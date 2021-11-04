@@ -1,6 +1,6 @@
 # 🟣 FUN - HAL
 
-![Stack CI workflow](https://github.com/EpitechPromo2024/B-FUN-500-BDX-5-1-HAL-guillaume.bogard-coquard/actions/workflows/main.yml/badge.svg)
+![Stack CI workflow](https://github.com/EpitechPromo2024/B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard/actions/workflows/main.yml/badge.svg)
 
 # Description 📖
 
@@ -23,7 +23,7 @@ The program can take files to be interpreted by arguments but can also interpret
 
 | Short flag | Long flag | Description                                  |
 | ---------- | --------- | -------------------------------------------- |
-| `-h`       | --help    | Displays the program's usage.                |
+| `-h`       | `--help`  | Displays the program's usage.                |
 | `-i`       |           | Launches the REPL alongside other arguments. |
 
 ***
@@ -34,7 +34,7 @@ This project has been setup with [Stack](https://docs.haskellstack.org/en/stable
 
 | Command          | Result                                         |
 | ---------------- | ---------------------------------------------- |
-| `make`           | Builds a ```hal``` executable.                 |
+| `make`           | Builds a `hal` executable.                     |
 | `make tests_run` | Runs tests.                                    |
 | `make clean`     | Cleans build dumps, keeping the executable.    |
 | `make fclean`    | Removes all of the files created by the build. |

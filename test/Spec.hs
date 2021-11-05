@@ -1,2 +1,16 @@
+module Main               ( main ) where
+
+import Test.Hspec         ( hspec
+                          , Spec
+                          , describe )
+
+import ArgumentLexerSpec  ( spec )
+import ArgumentParserSpec ( spec )
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = hspec Main.spec
+
+spec :: Spec
+spec = do
+    describe "ArgumentLexer"  ArgumentLexerSpec.spec
+    describe "ArgumentParser" ArgumentParserSpec.spec

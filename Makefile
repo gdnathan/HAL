@@ -14,7 +14,7 @@ STACK_NAME		=	hal
 NAME			=	hal
 
 all:
-	stack build --pedantic
+	stack build
 	cp $(BINARY_PATH)/bin/$(STACK_NAME)-exe ./$(NAME)
 .PHONY:	all
 

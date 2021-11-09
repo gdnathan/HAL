@@ -5,11 +5,13 @@
 -- Error
 --
 
-module Error         ( Error(..) ) where
+module Interpreter.Error   ( Error(..) ) where
 
 import GHC.Exception ( Exception )
 
-data Error = HelpError
-           | ArgumentParsingError String
-             deriving Show
+type ExpressionName = String
+
+data Error = ParsingError String
+           | NameStartWithNumber ExpressionName
+  deriving Show
 instance Exception Error

@@ -14,8 +14,6 @@ import System.Exit                      ( ExitCode( ExitFailure )
 
 import CLIArguments.Parser  ( parseArgs, HalExecution(..) )
 import CLIArguments.Error   ( Error(..) )
-import System.IO (readFile)
-import GHC.IO (evaluate)
 -- import Error                ( Error(..) )
 
 main :: IO ()
@@ -31,8 +29,8 @@ dispatchExecutions :: HalExecution -> IO ()
 dispatchExecutions execution = dispatchExecutions' execution emptyContext
 
 dispatchExecutions' :: HalExecution -> Context -> IO ()
-dispatchExecutions' PrintHelp               context = printHelp
-dispatchExecutions' (Evaluate []          ) context = throw $ ArgumentParsingError "Nothing to evaluate."
+dispatchExecutions' PrintHelp               _       = printHelp
+dispatchExecutions' (Evaluate []          ) _       = throw $ ArgumentParsingError "Nothing to evaluate."
 dispatchExecutions' (Evaluate [file]      ) context = readFile file >>= \content -> print $ snd $ evaluateExpr context content
 dispatchExecutions' (Evaluate (file : xs) ) context = readFile file >>= \content -> dispatchExecutions' (Evaluate xs) $ fst $ evaluateExpr context content
 dispatchExecutions' (Repl     []          ) context = infiniteLoop context

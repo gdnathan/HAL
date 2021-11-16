@@ -14,6 +14,8 @@ import System.Exit                      ( ExitCode( ExitFailure )
 
 import CLIArguments.Parser  ( parseArgs, HalExecution(..) )
 import CLIArguments.Error   ( Error(..) )
+import Interpreter.Lexer    -- ( buildEvaluationTree, HalExecution(..) )
+import Interpreter.Parser   -- ( buildEvaluationTree, HalExecution(..) )
 -- import Error                ( Error(..) )
 
 main :: IO ()
@@ -31,10 +33,10 @@ dispatchExecutions execution = dispatchExecutions' execution emptyContext
 dispatchExecutions' :: HalExecution -> Context -> IO ()
 dispatchExecutions' PrintHelp               _       = printHelp
 dispatchExecutions' (Evaluate []          ) _       = throw $ ArgumentParsingError "Nothing to evaluate."
-dispatchExecutions' (Evaluate [file]      ) context = readFile file >>= \content -> print $ snd $ evaluateExpr context content
-dispatchExecutions' (Evaluate (file : xs) ) context = readFile file >>= \content -> dispatchExecutions' (Evaluate xs) $ fst $ evaluateExpr context content
+dispatchExecutions' (Evaluate [file]      ) context = readFile file >>= \content -> print $ fst $ evaluateExpr context content
+dispatchExecutions' (Evaluate (file : xs) ) context = readFile file >>= \content -> dispatchExecutions' (Evaluate xs) $ snd $ evaluateExpr context content
 dispatchExecutions' (Repl     []          ) context = infiniteLoop context
-dispatchExecutions' (Repl     (file : xs) ) context = readFile file >>= \content -> dispatchExecutions' (Repl xs) $ fst $ evaluateExpr context content
+dispatchExecutions' (Repl     (file : xs) ) context = readFile file >>= \content -> dispatchExecutions' (Repl xs) $ snd $ evaluateExpr context content
 
 printHelp :: IO ()
 printHelp = putStrLn "This is a help."
@@ -45,9 +47,9 @@ emptyContext = 2
 infiniteLoop :: Context -> IO ()
 infiniteLoop _ = putStrLn "Infinite loop..."
 
-type EvaluatedValue = Int
+type EvaluatedValue = [Tree]
 evaluateExpr :: Context -> String -> (EvaluatedValue, Context)
-evaluateExpr _ _ = (1, 2)
+evaluateExpr _ str = (buildExpressionsTrees $ tokenize str, 2)
 
 handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
 handleCLIArgumentsErrors (InvalidOption optionName) = putStrLn ("Invalid option '" ++ optionName ++ "'")  >> exitWith (ExitFailure 84)

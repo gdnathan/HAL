@@ -35,8 +35,8 @@ data BuiltIns = Cons
               | Cond
   deriving (Show)
 
-data Token =  ParenthesesOpen
-            | ParenthesesClose
+data Token =  ParenthesisOpen
+            | ParenthesisClose
             | TTrue
             | TFalse
             | Nil
@@ -61,14 +61,16 @@ tokenize' '('   t               = LParenthesisOpen  : t
 tokenize' ')'   t               = LParenthesisClose : t
 tokenize' '\''  t               = LQuote            : t
 tokenize' ' '   t               = Space             : t
+tokenize' '\t'  t               = Space             : t
+tokenize' '\n'  t               = Space             : t
 tokenize' x     (LWord a : ts)  = LWord (x : a)     : ts
 tokenize' x     t               = LWord [x]         : t
 
 convertLexingToken :: [LexingToken] -> [Token]
 convertLexingToken []                       = []
 convertLexingToken (Space             : xs) = convertLexingToken xs
-convertLexingToken (LParenthesisOpen  : xs) = ParenthesesOpen   : convertLexingToken xs
-convertLexingToken (LParenthesisClose : xs) = ParenthesesClose  : convertLexingToken xs
+convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen   : convertLexingToken xs
+convertLexingToken (LParenthesisClose : xs) = ParenthesisClose  : convertLexingToken xs
 convertLexingToken (LQuote            : xs) = BuiltIn Quote     : convertLexingToken xs
 convertLexingToken (LTrue             : xs) = TTrue             : convertLexingToken xs
 convertLexingToken (LFalse            : xs) = TFalse            : convertLexingToken xs

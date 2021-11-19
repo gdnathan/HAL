@@ -33,6 +33,8 @@ library
       Interpreter.Lexer
       Interpreter.Parser
       Interpreter.Error
+      Interpreter.Evaluate
+      Interpreter.Builtins
       Error
   other-modules:
       Paths_hal

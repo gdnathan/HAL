@@ -5,13 +5,28 @@
 -- Error
 --
 
-module Interpreter.Error   ( Error(..) ) where
+module Interpreter.Error  ( Error(..)
+                          , BuiltInError(..)
+                          ) where
 
 import GHC.Exception ( Exception )
 
+type ProbableReason = String
 type ExpressionName = String
+type Name           = String
+type BuiltInName    = String
 
-data Error = ParsingError String
-           | NameStartWithNumber ExpressionName
+data BuiltInError = ArgumentIsNotAPair
+  deriving Show
+
+data Error = ParsingError         ProbableReason
+           | NameStartWithNumber  ExpressionName
+           | InternalError        ProbableReason
+           | UnknownName          Name
+           | InvalidSyntax        ProbableReason
+           | InvalidNumberOfArguments
+           | BuiltInError BuiltInName BuiltInError
+           | NotAProcedure
+           | ArgumentIsNotNumber
   deriving Show
 instance Exception Error

@@ -7,101 +7,55 @@
 
 module Interpreter.Lexer  ( tokenize
                           , Token(..)
-                          , BuiltIns(..)
+                          -- , BuiltIns(..)
                           ) where
 
 import GHC.Unicode                ( isDigit )
 
 import Control.Exception.Base (throw)
 import Text.Read (readMaybe)
-import Interpreter.Error (Error(NameStartWithNumber, ParsingError))
+import Interpreter.Error (Error(NameStartWithNumber, ParsingError, InternalError))
 
-data BuiltIns = Cons
-              | Car
-              | Cdr
-              | IsEq
-              | IsAtom
-              | Plus
-              | Minus
-              | Multiplication
-              | Div
-              | Mod
-              | Lt
-              | Gt
-              | Quote
-              | Lambda
-              | Define
-              | Let
-              | Cond
-  deriving (Show)
-
-data Token =  ParenthesisOpen
+data Token  = ParenthesisOpen
             | ParenthesisClose
-            | TTrue
-            | TFalse
-            | Nil
-            | BuiltIn BuiltIns
+            | Quote
             | Number Float
-            | Word String
+            | Symbol String
   deriving (Show)
 
 data LexingToken =  LParenthesisOpen
                   | LParenthesisClose
                   | LQuote
-                  | LTrue
-                  | LFalse
-                  | Space
+                  | LSpace
                   | LWord   String
 
 tokenize :: String -> [Token]
+-- tokenize = foldr tokenize' []
 tokenize = convertLexingToken . foldr tokenize' []
 
 tokenize' :: Char -> [LexingToken] -> [LexingToken]
 tokenize' '('   t               = LParenthesisOpen  : t
 tokenize' ')'   t               = LParenthesisClose : t
 tokenize' '\''  t               = LQuote            : t
-tokenize' ' '   t               = Space             : t
-tokenize' '\t'  t               = Space             : t
-tokenize' '\n'  t               = Space             : t
+tokenize' ' '   t               = LSpace            : t
+tokenize' '\t'  t               = LSpace            : t
+tokenize' '\n'  t               = LSpace            : t
 tokenize' x     (LWord a : ts)  = LWord (x : a)     : ts
 tokenize' x     t               = LWord [x]         : t
 
 convertLexingToken :: [LexingToken] -> [Token]
 convertLexingToken []                       = []
-convertLexingToken (Space             : xs) = convertLexingToken xs
-convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen   : convertLexingToken xs
-convertLexingToken (LParenthesisClose : xs) = ParenthesisClose  : convertLexingToken xs
-convertLexingToken (LQuote            : xs) = BuiltIn Quote     : convertLexingToken xs
-convertLexingToken (LTrue             : xs) = TTrue             : convertLexingToken xs
-convertLexingToken (LFalse            : xs) = TFalse            : convertLexingToken xs
-convertLexingToken (LWord str         : xs) = identifyWord str  : convertLexingToken xs
+convertLexingToken (LSpace            : xs) = convertLexingToken xs
+convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen       : convertLexingToken xs
+convertLexingToken (LParenthesisClose : xs) = ParenthesisClose      : convertLexingToken xs
+convertLexingToken (LQuote            : xs) = Quote                 : convertLexingToken xs
+convertLexingToken (LWord str         : xs) = wordToWordOrNumber str  : convertLexingToken xs
 
-identifyWord :: String -> Token
-identifyWord "nil"    = Nil
-identifyWord "#t"     = TTrue
-identifyWord "#f"     = TFalse
-identifyWord "cons"   = BuiltIn Cons
-identifyWord "car"    = BuiltIn Car
-identifyWord "cdr"    = BuiltIn Cdr
-identifyWord "eq?"    = BuiltIn IsEq
-identifyWord "atom?"  = BuiltIn IsAtom
-identifyWord "+"      = BuiltIn Plus
-identifyWord "-"      = BuiltIn Minus
-identifyWord "*"      = BuiltIn Multiplication
-identifyWord "div"    = BuiltIn Div
-identifyWord "mod"    = BuiltIn Mod
-identifyWord "<"      = BuiltIn Lt
-identifyWord ">"      = BuiltIn Gt
-identifyWord "quote"  = BuiltIn Quote
-identifyWord "'"      = BuiltIn Quote
-identifyWord "lambda" = BuiltIn Lambda
-identifyWord "define" = BuiltIn Define
-identifyWord "let"    = BuiltIn Let
-identifyWord "cond"   = BuiltIn Cond
-identifyWord str@(x:_)
-          | isDigit x = Number $ readAndCheck str
-          | otherwise = Word str
-identifyWord _        = throw $ ParsingError "This can not happen, but ide is bugged"
+wordToWordOrNumber :: String -> Token
+wordToWordOrNumber str@(x : _)
+                    | isDigit x = Number $ readAndCheck str
+                    | otherwise = Symbol str
+wordToWordOrNumber _            = throw $ InternalError "A word should never be empty"
 
 readAndCheck :: String -> Float
 readAndCheck name = readAndCheck' name $ readMaybe name

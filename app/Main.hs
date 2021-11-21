@@ -14,10 +14,18 @@ import System.Exit                      ( ExitCode( ExitFailure )
 
 import CLIArguments.Parser  ( parseArgs, HalExecution(..) )
 import CLIArguments.Error   ( Error(..) )
-import Interpreter.Lexer    -- ( buildEvaluationTree, HalExecution(..) )
-import Interpreter.Parser   -- ( buildEvaluationTree, HalExecution(..) )
-import Interpreter.Evaluate (EvaluatedValue(..), EvaluatingContext(..), EvaluationResult(..), Register(..), evaluateTree)
-import Interpreter.Builtins (initialRegister)
+import Interpreter.Lexer ( tokenize )    -- ( buildEvaluationTree, HalExecution(..) )
+import Interpreter.Parser ( buildExpressionsTrees )   -- ( buildEvaluationTree, HalExecution(..) )
+-- import Interpreter.Evaluate (EvaluatedValue(..), EvaluatingContext(..), EvaluationResult(..), Register(..), evaluateExpr)
+import Interpreter.Data.Tree ( Tree(..) )
+import Interpreter.EvaluateValue ( EvaluatingContext(..), evaluateValue)
+import Interpreter.EvaluateExpr ( EvaluationResult(..), evaluateExpr)
+import Interpreter.Data.Register    ( Register
+                                    , EvaluatedValue(..)
+                                    , regInsertRange2
+                                    , RegisterId (RegisterId)
+                                    )
+import Interpreter.Builtins.All (initialRegister)
 import System.IO (hFlush, stdout)
 -- import Error                ( Error(..) )
 
@@ -62,7 +70,7 @@ evaluateTrees reg = evaluateTrees' (Result (reg, NoValue))
 
 evaluateTrees' :: EvaluationResult -> [Tree] -> EvaluationResult
 evaluateTrees' res               []               = res
-evaluateTrees' (Result (reg, _)) (tree : others)  = evaluateTrees' (evaluateTree (Context (reg, tree))) others
+evaluateTrees' (Result (reg, _)) (tree : others)  = evaluateTrees' (evaluateExpr (Context (reg, tree))) others
 
 resReg :: EvaluationResult -> Register
 resReg (Result (reg, _)) = reg

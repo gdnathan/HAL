@@ -30,11 +30,22 @@ library
       CLIArguments.Lexer
       CLIArguments.Parser
       CLIArguments.Error
+      Interpreter.Data.Register
+      Interpreter.Data.Token
+      Interpreter.Data.Tree
+      Interpreter.Builtins.All
+      Interpreter.Builtins.Arithmetic
+      Interpreter.Builtins.Define
+      Interpreter.Builtins.Lambda
+      Interpreter.Builtins.List
+      Interpreter.Builtins.Ord
+      Interpreter.Builtins.Quote
+      Interpreter.Builtins.Test
+      Interpreter.Error
+      Interpreter.EvaluateExpr
+      Interpreter.EvaluateValue
       Interpreter.Lexer
       Interpreter.Parser
-      Interpreter.Error
-      Interpreter.Evaluate
-      Interpreter.Builtins
       Error
   other-modules:
       Paths_hal

@@ -5,102 +5,55 @@
 -- Parser
 --
 
-module Interpreter.Parser ( buildExpressionsTrees
-                          , RegisterId (..)
-                          , ProcedureArg (..)
-                          , NodeFirstElement (..)
-                          , Tree (..)
-                          ) where
+module Interpreter.Parser       ( buildExpressionsTrees ) where
 
--- import Interpreter.Precompilation  ( Token(..)
---                           -- , BuiltIns(..)
---                           )
--- import qualified Interpreter.Precompilation as Precompilation
-import Interpreter.Lexer  ( Token(..)
-                          -- , BuiltIns(..)
-                          )
-import qualified Interpreter.Lexer as Lexer
-import GHC.Exception      ( throw )
-import Interpreter.Error  ( Error(ParsingError) )
+import GHC.Exception            ( throw )
 
-newtype RegisterId = RegisterId String
-  deriving (Ord, Eq, Show)
+import Interpreter.Error        ( Error(ParsingError, InvalidSyntax) )
+import Interpreter.Data.Token   ( Token(..) )
+import qualified Interpreter.Data.Token as Token
+import Interpreter.Data.Tree    ( Tree(..), ProcedureArg(..) )
+import qualified Interpreter.Data.Tree as Tree
 
-data ProcedureArg = Number Float
-                  | Symbol String
-                  -- | Word   String
-                  | UnCreatedList [Tree]
-  deriving (Show)
-                  --  Nil
-
-data NodeFirstElement = Id RegisterId
-                      | IdToGenerate Tree
-  deriving (Show)
-
-data Tree = Empty
-          | Node    NodeFirstElement [Tree]
-          | Leaf    ProcedureArg
-  deriving (Show)
-          --  Quoted  Tree
-
-type UnderConstructionTree = ([Token], Tree)
+type UnderConstructionTree  = ([Token], Maybe Tree)
+type ParsedArgs             = ([Token], [Tree])
 
 buildExpressionsTrees :: [Token] -> [Tree]
-buildExpressionsTrees = loopBuilding . launchParse
+buildExpressionsTrees = loopBuilding . launchExprParse
 
 loopBuilding :: UnderConstructionTree -> [Tree]
-loopBuilding ([],     tree) = [tree]
-loopBuilding (tokens, tree) = tree : loopBuilding (launchParse tokens)
+loopBuilding ([],     Just tree)  = [tree]
+loopBuilding (tokens, Just tree)  = tree : loopBuilding (launchExprParse tokens)
+loopBuilding (_,      Nothing)    = throw $ InvalidSyntax "an expression can not be empty"
 
-launchParse :: [Token] -> UnderConstructionTree
-launchParse tokens = parseExpression (tokens, Empty)
+launchExprParse :: [Token] -> UnderConstructionTree
+launchExprParse tokens = parseExpr (tokens, Nothing)
 
-parseExpression :: UnderConstructionTree -> UnderConstructionTree
-parseExpression (ParenthesisOpen            : xs, _   ) = parseExpression' xs
-parseExpression (Quote : ParenthesisOpen    : xs, _   ) = let (xss, res) = getArgs xs in (xss, Leaf $ UnCreatedList res)
-parseExpression (Quote                      : xs, _   ) = wrapArgs (Id (RegisterId "quote")) $ getArg xs
-parseExpression (ParenthesisClose           : xs, tree) = (xs, tree)
-parseExpression (Lexer.Symbol str  : xs, _   ) = (xs, Leaf $ Interpreter.Parser.Symbol str)
-parseExpression (Lexer.Number n    : xs, _   ) = (xs, Leaf $ Interpreter.Parser.Number n)
-parseExpression _                                       = throw $ ParsingError "Invalid expression 1."
+parseExpr :: UnderConstructionTree -> UnderConstructionTree
+parseExpr (ParenthesisOpen            : xs, _   ) = wrapArgs $ getArgs xs
+parseExpr (ParenthesisClose           : xs, tree) = (xs, tree)
+parseExpr (Token.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Tree.Symbol str)
+parseExpr (Token.Number n             : xs, _   ) = (xs, Just $ Leaf $ Tree.Number n)
+parseExpr (Quote : ParenthesisOpen    : xs, _   ) = let (xss, res) = getArgs xs in (xss, Just $ Leaf $ UnCreatedList res)
+parseExpr (Quote                      : xs, _   ) = wrapArgsWithHeader (Leaf (Tree.Symbol "quote")) $ getArg xs
+parseExpr _                                       = throw $ ParsingError "Invalid expression 1."
 
-parseExpression' :: [Token] -> UnderConstructionTree
--- parseExpression' (Lexer.Word   name : xs) = wrapArgs (Id (RegisterId name))            $ getArgs xs
-parseExpression' (Lexer.Symbol name : xs) = wrapArgs (Id (RegisterId name))            $ getArgs xs
-parseExpression' tokens@(ParenthesisOpen     : _ ) = let (xss, funcId) = launchParse tokens in wrapArgs (IdToGenerate funcId) $ getArgs xss
-parseExpression' _                                 = throw $ ParsingError "Invalid expression 2."
--- parseExpression' (BuiltIn builtIn             : xs) = wrapArgs (convertBuiltIns builtIn) $ getArgs xs
--- parseExpression' (TTrue                       : xs) = wrapArgs FTrue                     $ getArgs xs
--- parseExpression' (TFalse                      : xs) = wrapArgs FFalse                    $ getArgs xs
+wrapArgsWithHeader :: Tree -> ParsedArgs -> UnderConstructionTree
+wrapArgsWithHeader funcId (tokens, args) = (tokens, Just $ Node (funcId : args))
 
-wrapArgs :: NodeFirstElement -> ([Token], [Tree]) -> UnderConstructionTree
-wrapArgs funcId (tokens, args) = (tokens, Node funcId args)
+wrapArgs :: ParsedArgs -> UnderConstructionTree
+wrapArgs (tokens, args) = (tokens, Just $ Node args)
 
-getArg :: [Token] -> ([Token], [Tree])
-getArg tokens = let (xs, arg) = launchParse xs in (xs, [arg])
+getArg :: [Token] -> ParsedArgs
+getArg tokens = getArg' $ launchExprParse tokens
 
-getArgs :: [Token] -> ([Token], [Tree])
-getArgs tokens = getArgs' [] $ launchParse tokens
+getArg' :: UnderConstructionTree -> ParsedArgs
+getArg' (xs, Just arg) = (xs, [arg])
+getArg' (xs, Nothing ) = (xs, [])
 
-getArgs' :: [Tree] -> UnderConstructionTree -> ([Token], [Tree])
-getArgs' res (xs, Empty) = (xs, res)
-getArgs' _   (xs, arg)   = let (xss, trees) = getArgs xs in (xss, arg : trees)
+getArgs :: [Token] -> ParsedArgs
+getArgs tokens = getArgs' [] $ launchExprParse tokens
 
--- convertBuiltIns :: Interpreter.Lexer.BuiltIns -> Interpreter.Parser.FuncId
--- convertBuiltIns Interpreter.Lexer.Cons            = Interpreter.Parser.Cons
--- convertBuiltIns Interpreter.Lexer.Car             = Interpreter.Parser.Car
--- convertBuiltIns Interpreter.Lexer.Cdr             = Interpreter.Parser.Cdr
--- convertBuiltIns Interpreter.Lexer.IsEq            = Interpreter.Parser.IsEq
--- convertBuiltIns Interpreter.Lexer.IsAtom          = Interpreter.Parser.IsAtom
--- convertBuiltIns Interpreter.Lexer.Plus            = Interpreter.Parser.Plus
--- convertBuiltIns Interpreter.Lexer.Minus           = Interpreter.Parser.Minus
--- convertBuiltIns Interpreter.Lexer.Multiplication  = Interpreter.Parser.Multiplication
--- convertBuiltIns Interpreter.Lexer.Div             = Interpreter.Parser.Div
--- convertBuiltIns Interpreter.Lexer.Mod             = Interpreter.Parser.Mod
--- convertBuiltIns Interpreter.Lexer.Lt              = Interpreter.Parser.Lt
--- convertBuiltIns Interpreter.Lexer.Gt              = Interpreter.Parser.Gt
--- convertBuiltIns Interpreter.Lexer.Quote           = Interpreter.Parser.Quote
--- convertBuiltIns Interpreter.Lexer.Lambda          = Interpreter.Parser.Lambda
--- convertBuiltIns Interpreter.Lexer.Define          = Interpreter.Parser.Define
--- convertBuiltIns Interpreter.Lexer.Let             = Interpreter.Parser.Let
--- convertBuiltIns Interpreter.Lexer.Cond            = Interpreter.Parser.Cond
+getArgs' :: [Tree] -> UnderConstructionTree -> ParsedArgs
+getArgs' res (xs, Nothing) = (xs, res)
+getArgs' _   (xs, Just arg)   = let (xss, trees) = getArgs xs in (xss, arg : trees)

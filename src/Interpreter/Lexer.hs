@@ -5,23 +5,14 @@
 -- Lexer
 --
 
-module Interpreter.Lexer  ( tokenize
-                          , Token(..)
-                          -- , BuiltIns(..)
-                          ) where
+module Interpreter.Lexer  ( tokenize ) where
 
-import GHC.Unicode                ( isDigit )
+import GHC.Unicode            ( isDigit )
+import Control.Exception.Base ( throw )
+import Text.Read              ( readMaybe )
 
-import Control.Exception.Base (throw)
-import Text.Read (readMaybe)
-import Interpreter.Error (Error(NameStartWithNumber, ParsingError, InternalError))
-
-data Token  = ParenthesisOpen
-            | ParenthesisClose
-            | Quote
-            | Number Float
-            | Symbol String
-  deriving (Show)
+import Interpreter.Error      ( Error(..) )
+import Interpreter.Data.Token ( Token(..) )
 
 data LexingToken =  LParenthesisOpen
                   | LParenthesisClose
@@ -30,7 +21,6 @@ data LexingToken =  LParenthesisOpen
                   | LWord   String
 
 tokenize :: String -> [Token]
--- tokenize = foldr tokenize' []
 tokenize = convertLexingToken . foldr tokenize' []
 
 tokenize' :: Char -> [LexingToken] -> [LexingToken]
@@ -46,9 +36,9 @@ tokenize' x     t               = LWord [x]         : t
 convertLexingToken :: [LexingToken] -> [Token]
 convertLexingToken []                       = []
 convertLexingToken (LSpace            : xs) = convertLexingToken xs
-convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen       : convertLexingToken xs
-convertLexingToken (LParenthesisClose : xs) = ParenthesisClose      : convertLexingToken xs
-convertLexingToken (LQuote            : xs) = Quote                 : convertLexingToken xs
+convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen         : convertLexingToken xs
+convertLexingToken (LParenthesisClose : xs) = ParenthesisClose        : convertLexingToken xs
+convertLexingToken (LQuote            : xs) = Quote                   : convertLexingToken xs
 convertLexingToken (LWord str         : xs) = wordToWordOrNumber str  : convertLexingToken xs
 
 wordToWordOrNumber :: String -> Token

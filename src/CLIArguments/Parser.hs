@@ -5,29 +5,31 @@
 -- Parser
 --
 
-module CLIArguments.Parser    ( HalExecution(..)
-                              , parseArgs
+module CLIArguments.Parser    ( parseArgs
+                              , HalConfig(..)
+                              , HalExecution(..)
                               ) where
 
 import CLIArguments.Lexer     ( Token(..), tokenizeArgs )
 
-data HalExecution = PrintHelp | Repl [String] | Evaluate [String]
+data HalExecution = PrintHelp | Repl | Evaluate
   deriving Show
 
-parseArgs :: [String] -> HalExecution
+data HalConfig = HalConfig HalExecution [String]
+  deriving Show
+
+parseArgs :: [String] -> HalConfig
 parseArgs = parseTokenizedArgs . tokenizeArgs
 
-parseTokenizedArgs :: [Token] -> HalExecution
+parseTokenizedArgs :: [Token] -> HalConfig
 parseTokenizedArgs []     = defaultHalExecution
-parseTokenizedArgs tokens = foldr parseTokenizedArgs' (Evaluate []) tokens
+parseTokenizedArgs tokens = foldr parseTokenizedArgs' (HalConfig Evaluate []) tokens
 
-parseTokenizedArgs' :: Token -> HalExecution -> HalExecution
-parseTokenizedArgs' _             PrintHelp               = PrintHelp
-parseTokenizedArgs' HELP          _                       = PrintHelp
-parseTokenizedArgs' LAUNCH_REPL   (Evaluate   filesName)  = Repl filesName
-parseTokenizedArgs' LAUNCH_REPL   conf@(Repl  _        )  = conf
-parseTokenizedArgs' (FILE file)   (Evaluate   filesName)  = Evaluate  $ file : filesName
-parseTokenizedArgs' (FILE file)   (Repl       filesName)  = Repl      $ file : filesName
+parseTokenizedArgs' :: Token -> HalConfig -> HalConfig
+parseTokenizedArgs' HELP        _                               = HalConfig PrintHelp []
+parseTokenizedArgs' _           (HalConfig PrintHelp _)         = HalConfig PrintHelp []
+parseTokenizedArgs' LAUNCH_REPL (HalConfig _         filesName) = HalConfig Repl filesName
+parseTokenizedArgs' (FILE file) (HalConfig exec      filesName) = HalConfig exec  $ file : filesName
 
-defaultHalExecution :: HalExecution
-defaultHalExecution = Repl []
+defaultHalExecution :: HalConfig
+defaultHalExecution = HalConfig Repl []

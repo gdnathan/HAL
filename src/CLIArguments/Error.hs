@@ -13,5 +13,7 @@ type OptionName = String
 
 data Error = ArgumentParsingError String
            | InvalidOption OptionName
-  deriving Show
+instance Show Error where
+  show (InvalidOption         optionName) = "Invalid option '" ++ optionName ++ "'"
+  show (ArgumentParsingError  str)        = str
 instance Exception Error

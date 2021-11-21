@@ -17,16 +17,23 @@ type Name           = String
 type BuiltInName    = String
 
 data BuiltInError = ArgumentIsNotAPair
-  deriving Show
+instance Show BuiltInError where
+  show ArgumentIsNotAPair = "attempt to apply non-pair"
 
-data Error = ParsingError         ProbableReason
-           | NameStartWithNumber  ExpressionName
-           | InternalError        ProbableReason
+data Error = InternalError        ProbableReason
            | UnknownName          Name
            | InvalidSyntax        ProbableReason
            | InvalidNumberOfArguments
            | BuiltInError BuiltInName BuiltInError
            | NotAProcedure
            | ArgumentIsNotNumber
-  deriving Show
+instance Show Error where
+  show (InternalError       _)    = "an unexpected error happened"
+  show (UnknownName         name) = "variable " ++ name ++ " is not bound"
+  show (InvalidSyntax       _)    = "invalid syntax"
+  show InvalidNumberOfArguments   = "incorrect argument count"
+  show NotAProcedure              = "attempt to apply non-procedure"
+  show ArgumentIsNotNumber        = "attempt to apply non-number"
+  show (BuiltInError  name error) = name ++ ": " ++ show error
+
 instance Exception Error

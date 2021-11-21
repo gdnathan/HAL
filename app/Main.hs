@@ -7,81 +7,63 @@
 
 module Main where
 
-import System.Environment               ( getArgs )
-import Control.Exception                ( catches, Handler(..), throw )
-import System.Exit                      ( ExitCode( ExitFailure )
-                                        , exitWith )
+import System.Environment         ( getArgs )
+import Control.Exception          ( catches, throw, Handler(..) )
+import System.Exit                ( exitWith, ExitCode( ExitFailure ) )
+import System.IO                  ( hFlush, stdout )
 
-import CLIArguments.Parser  ( parseArgs, HalExecution(..) )
-import CLIArguments.Error   ( Error(..) )
-import Interpreter.Lexer ( tokenize )    -- ( buildEvaluationTree, HalExecution(..) )
-import Interpreter.Parser ( buildExpressionsTrees )   -- ( buildEvaluationTree, HalExecution(..) )
--- import Interpreter.Evaluate (EvaluatedValue(..), EvaluatingContext(..), EvaluationResult(..), Register(..), evaluateExpr)
-import Interpreter.Data.Tree ( Tree(..) )
-import Interpreter.EvaluateValue ( EvaluatingContext(..), evaluateValue)
-import Interpreter.EvaluateExpr ( EvaluationResult(..), evaluateExpr)
-import Interpreter.Data.Register    ( Register
-                                    , EvaluatedValue(..)
-                                    , regInsertRange2
-                                    , RegisterId (RegisterId)
-                                    )
-import Interpreter.Builtins.All (initialRegister)
-import System.IO (hFlush, stdout)
--- import Error                ( Error(..) )
+import CLIArguments.Parser        ( parseArgs
+                                  , HalConfig(..)
+                                  , HalExecution( PrintHelp, Evaluate, Repl )
+                                  )
+import CLIArguments.Error         ( Error( ArgumentParsingError ) )
+import Interpreter.Error          ( Error )
+import Interpreter.EvaluateExpr   ( evaluateExpr, EvaluationResult(..) )
+import Interpreter.Data.Register  ( EvaluatedValue, Register )
+import Interpreter.Builtins.All   ( initialRegister )
 
 main :: IO ()
 main = catches
-        (getArgs >>= dispatchExecutions . parseArgs)
+        (getArgs >>= dispatchExecutions . replaceFileNameByFileContent . parseArgs)
         [ Handler handleCLIArgumentsErrors
-        -- , Handler handleErrors
+        , Handler handleInterpreterErrors
         ]
 
--- type Context = Int
+replaceFileNameByFileContent :: HalConfig -> IO HalConfig
+replaceFileNameByFileContent (HalConfig PrintHelp _)     = return $ HalConfig PrintHelp []
+replaceFileNameByFileContent (HalConfig exec      files) = readFileList files >>= \contents -> return $ HalConfig exec contents
 
-dispatchExecutions :: HalExecution -> IO ()
-dispatchExecutions execution = dispatchExecutions' execution initialRegister
+readFileList :: [String] -> IO [String]
+readFileList []           = return []
+readFileList (file : xs)  = readFile file >>= \content -> readFileList xs >>= \res -> return (content : res)
 
-dispatchExecutions' :: HalExecution -> Register -> IO ()
-dispatchExecutions' PrintHelp               _       = printHelp
-dispatchExecutions' (Evaluate []          ) _       = throw $ ArgumentParsingError "Nothing to evaluate."
-dispatchExecutions' (Evaluate [file]      ) reg = readFile file >>= \content -> print $ resVal $ evaluateFile reg content
-dispatchExecutions' (Evaluate (file : xs) ) reg = readFile file >>= \content -> dispatchExecutions' (Evaluate xs) $ resReg $ evaluateFile reg content
-dispatchExecutions' (Repl     []          ) reg = infiniteLoop reg
-dispatchExecutions' (Repl     (file : xs) ) reg = readFile file >>= \content -> dispatchExecutions' (Repl xs) $ resReg $ evaluateFile reg content
+dispatchExecutions :: IO HalConfig -> IO ()
+dispatchExecutions config = config >>= \conf -> dispatchExecutions' conf initialRegister
 
-printHelp :: IO ()
-printHelp = putStrLn "This is a help."
-
--- emptyContext :: EvaluatingContext
--- emptyContext = Context (initialRegister, Empty)
--- (cond (#t 42))
-infiniteLoop :: Register -> IO ()
-infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' reg line)
-
-infiniteLoop' :: Register -> String -> IO ()
-infiniteLoop' reg line = let (Result (newReg, res)) = evaluateFile reg line in print res >> infiniteLoop newReg
-
--- type EvaluatedValue = [Tree]
-evaluateFile :: Register -> String -> EvaluationResult
-evaluateFile reg str = evaluateTrees reg $ buildExpressionsTrees $ tokenize str
-
-evaluateTrees :: Register -> [Tree] -> EvaluationResult
-evaluateTrees reg = evaluateTrees' (Result (reg, NoValue))
-
-evaluateTrees' :: EvaluationResult -> [Tree] -> EvaluationResult
-evaluateTrees' res               []               = res
-evaluateTrees' (Result (reg, _)) (tree : others)  = evaluateTrees' (evaluateExpr (Context (reg, tree))) others
-
-resReg :: EvaluationResult -> Register
-resReg (Result (reg, _)) = reg
+dispatchExecutions' :: HalConfig -> Register -> IO ()
+dispatchExecutions' (HalConfig PrintHelp  _)                  _   = printHelp
+dispatchExecutions' (HalConfig Evaluate   [fileContent])      reg = print $ resVal $ evaluateExpr reg fileContent
+dispatchExecutions' (HalConfig exec       (fileContent : xs)) reg = dispatchExecutions' (HalConfig exec xs) $ resReg $ evaluateExpr reg fileContent
+dispatchExecutions' (HalConfig Repl       [])                 reg = infiniteLoop reg
+dispatchExecutions' (HalConfig Evaluate   [])                 reg = throw $ ArgumentParsingError "nothing to evaluate."
 
 resVal :: EvaluationResult -> EvaluatedValue
 resVal (Result (_, val)) = val
 
-handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
-handleCLIArgumentsErrors (InvalidOption optionName) = putStrLn ("Invalid option '" ++ optionName ++ "'")  >> exitWith (ExitFailure 84)
-handleCLIArgumentsErrors (ArgumentParsingError str) = putStrLn str                                        >> exitWith (ExitFailure 84)
+resReg :: EvaluationResult -> Register
+resReg (Result (reg, _)) = reg
 
--- handleErrors :: Error.Error -> IO ()
--- handleErrors HelpError = putStrLn "Invalid option" >> exitWith (ExitFailure 84)
--- handleErrors _ = putStrLn "Invalid option" >> exitWith (ExitFailure 84)
+printHelp :: IO ()
+printHelp = putStrLn "This is a help."
+
+infiniteLoop :: Register -> IO ()
+infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' reg line)
+
+infiniteLoop' :: Register -> String -> IO ()
+infiniteLoop' reg line = let (Result (newReg, res)) = evaluateExpr reg line in print res >> infiniteLoop newReg
+
+handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
+handleCLIArgumentsErrors error = putStrLn ("CLI Exception: " ++ show error) >> exitWith (ExitFailure 84)
+
+handleInterpreterErrors :: Interpreter.Error.Error -> IO ()
+handleInterpreterErrors error = putStrLn ("Exception: " ++ show error) >> exitWith (ExitFailure 84)

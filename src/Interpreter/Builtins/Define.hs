@@ -9,12 +9,20 @@ module Interpreter.Builtins.Define where
 
 import Data.Map                   ( Map )
 import qualified Data.Map as Map
+import Control.Exception          ( throw )
 
-import Interpreter.Data.Register (Register(..), EvaluatedValue(..), RegisterId(..), regInsert)
-import Interpreter.Data.Tree (Tree(..), ProcedureArg (..))
-import Control.Exception (throw)
-import Interpreter.Error (Error(..))
-import Interpreter.EvaluateValue (evaluateValue, EvaluatingContext (..))
+import Interpreter.Error          ( Error( InvalidNumberOfArguments, InvalidSyntax ) )
+import Interpreter.Data.Register  ( regInsert
+                                  , EvaluatedValue( Procedure )
+                                  , Register(..)
+                                  , RegisterId(..)
+                                  )
+import Interpreter.Data.Tree      ( Tree(..)
+                                  , ProcedureArg( Symbol )
+                                  )
+import Interpreter.EvaluateValue  ( EvaluatingContext( Context )
+                                  , evaluateValue
+                                  )
 
 define :: Register -> [Tree] -> (Register, String)
 define reg  [Leaf (Symbol name)                  , body] = (regInsert reg (RegisterId name) $ evaluateValue (Context (reg, body)) , name)
@@ -36,7 +44,6 @@ argsToIdsList []                          = []
 argsToIdsList ((Leaf (Symbol name)) : xs) = RegisterId name : argsToIdsList xs
 argsToIdsList _                           = throw $ InvalidSyntax "argument name must be a string"
 
--- if there is already a var named same as arg name, should throw
 addArgsToRegister :: [RegisterId] -> [EvaluatedValue] -> Register -> Register
 addArgsToRegister []        []        reg             = reg
 addArgsToRegister _         []        _               = throw InvalidNumberOfArguments

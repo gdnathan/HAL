@@ -42,14 +42,8 @@ convertLexingToken (LQuote            : xs) = Quote                   : convertL
 convertLexingToken (LWord str         : xs) = wordToWordOrNumber str  : convertLexingToken xs
 
 wordToWordOrNumber :: String -> Token
-wordToWordOrNumber str@(x : _)
-                    | isDigit x = Number $ readAndCheck str
-                    | otherwise = Symbol str
-wordToWordOrNumber _            = throw $ InternalError "A word should never be empty"
+wordToWordOrNumber str = wordToWordOrNumber' str $ readMaybe str
 
-readAndCheck :: String -> Float
-readAndCheck name = readAndCheck' name $ readMaybe name
-
-readAndCheck' :: String -> Maybe Float -> Float
-readAndCheck' _     (Just x)  = x
-readAndCheck' name  Nothing   = throw $ NameStartWithNumber name
+wordToWordOrNumber' :: String -> Maybe Float -> Token
+wordToWordOrNumber' name Nothing  = Symbol name
+wordToWordOrNumber' _    (Just n) = Number n

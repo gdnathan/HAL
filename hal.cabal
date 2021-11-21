@@ -46,7 +46,6 @@ library
       Interpreter.EvaluateValue
       Interpreter.Lexer
       Interpreter.Parser
-      Error
   other-modules:
       Paths_hal
   hs-source-dirs:

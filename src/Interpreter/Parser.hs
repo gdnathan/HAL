@@ -9,7 +9,7 @@ module Interpreter.Parser       ( buildExpressionsTrees ) where
 
 import GHC.Exception            ( throw )
 
-import Interpreter.Error        ( Error(ParsingError, InvalidSyntax) )
+import Interpreter.Error        ( Error( InvalidSyntax ) )
 import Interpreter.Data.Token   ( Token(..) )
 import qualified Interpreter.Data.Token as Token
 import Interpreter.Data.Tree    ( Tree(..), ProcedureArg(..) )
@@ -36,7 +36,7 @@ parseExpr (Token.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Tree.Symb
 parseExpr (Token.Number n             : xs, _   ) = (xs, Just $ Leaf $ Tree.Number n)
 parseExpr (Quote : ParenthesisOpen    : xs, _   ) = let (xss, res) = getArgs xs in (xss, Just $ Leaf $ UnCreatedList res)
 parseExpr (Quote                      : xs, _   ) = wrapArgsWithHeader (Leaf (Tree.Symbol "quote")) $ getArg xs
-parseExpr _                                       = throw $ ParsingError "Invalid expression 1."
+parseExpr ([], tree)                              = ([], tree)
 
 wrapArgsWithHeader :: Tree -> ParsedArgs -> UnderConstructionTree
 wrapArgsWithHeader funcId (tokens, args) = (tokens, Just $ Node (funcId : args))

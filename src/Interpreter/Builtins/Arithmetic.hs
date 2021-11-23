@@ -16,7 +16,7 @@ import Control.Exception          ( throw )
 import Data.Fixed                 ( mod' )
 
 import Interpreter.Error          ( Error ( InvalidNumberOfArguments
-                                          , ArgumentIsNotNumber
+                                          , ArgumentIsNotNumber, DividingByZero
                                           )
                                   )
 import Interpreter.Data.Register  ( Register
@@ -65,5 +65,6 @@ arithmetic2 func reg [left, right] = arithmetic2' func (evaluateValue (Context (
 arithmetic2 _    _   _             = throw InvalidNumberOfArguments
 
 arithmetic2' :: (Double -> Double -> Double) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
+arithmetic2' func (ValueNumber left) (ValueNumber 0)     = throw DividingByZero
 arithmetic2' func (ValueNumber left) (ValueNumber right) = ValueNumber $ left `func` right
 arithmetic2' _    _                  _                   = throw ArgumentIsNotNumber

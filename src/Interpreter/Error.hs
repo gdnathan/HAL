@@ -27,6 +27,7 @@ data Error = InternalError        ProbableReason
            | BuiltInError BuiltInName BuiltInError
            | NotAProcedure
            | ArgumentIsNotNumber
+           | DividingByZero
 instance Show Error where
   show (InternalError       _)    = "an unexpected error happened"
   show (UnknownName         name) = "variable " ++ name ++ " is not bound"
@@ -35,5 +36,6 @@ instance Show Error where
   show NotAProcedure              = "attempt to apply non-procedure"
   show ArgumentIsNotNumber        = "attempt to apply non-number"
   show (BuiltInError  name error) = name ++ ": " ++ show error
+  show DividingByZero             = "division by zero is not allowed"
 
 instance Exception Error

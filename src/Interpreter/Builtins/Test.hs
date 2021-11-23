@@ -23,7 +23,7 @@ import Interpreter.Data.Register  ( Register
                                                   , ValueTrue
                                                   , ValueName
                                                   , NoValue
-                                                  )
+                                                  ), regLookup, RegisterId (RegisterId)
                                   )
 import Interpreter.Data.Tree      ( Tree ( Node, Leaf )
                                   , ProcedureArg ( Symbol )
@@ -55,6 +55,8 @@ cond reg args = cond' reg args
 
 cond' :: Register -> [Tree] -> EvaluatedValue
 cond' reg (Node (Leaf (Symbol "#f") : _)    : xs) = cond' reg xs
+cond' reg (Node [Leaf (Symbol "#t") , arg]  : _)  = evaluateValue $ Context (reg, arg)
+cond' reg (Node [Leaf (Symbol name) , arg]  : xs) = cond' reg (Node [Leaf $ Symbol $ convertMdr $ regLookup reg (RegisterId name), arg] : xs)
 cond' reg (Node [Leaf _             , arg]  : _)  = evaluateValue $ Context (reg, arg)
 cond' reg (Node [id@(Node _)        , arg]  : xs) = cond' reg (Node [Leaf $ Symbol $ evaluateId reg id, arg] : xs)
 cond' reg (Node [toReturn]                  : xs) = evaluateValue $ Context (reg, toReturn)
@@ -62,6 +64,10 @@ cond' reg (Node (head : middle : end)       : xs) = cond' reg $ Node (head : end
 cond' _   []                                      = NoValue
 cond' reg (Node []                          : xs) = throw $ InvalidSyntax "must have at least one value to return"
 cond' _   (Leaf _                           : _)  = throw $ InvalidSyntax "argument(s) must be an expression"
+
+convertMdr :: EvaluatedValue -> String
+convertMdr ValueTrue  = "#t"
+convertMdr ValueFalse = "#f"
 
 evaluateId :: Register -> Tree -> String
 evaluateId reg node = evaluateId' $ evaluateValue $ Context (reg, node)

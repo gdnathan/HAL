@@ -44,6 +44,6 @@ convertLexingToken (LWord str         : xs) = wordToWordOrNumber str  : convertL
 wordToWordOrNumber :: String -> Token
 wordToWordOrNumber str = wordToWordOrNumber' str $ readMaybe str
 
-wordToWordOrNumber' :: String -> Maybe Float -> Token
+wordToWordOrNumber' :: String -> Maybe Double -> Token
 wordToWordOrNumber' name Nothing  = Symbol name
 wordToWordOrNumber' _    (Just n) = Number n

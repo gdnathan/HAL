@@ -20,7 +20,7 @@ newtype RegisterId = RegisterId String
 newtype Register = Register (Map RegisterId EvaluatedValue)
   deriving (Show)
 
-data EvaluatedValue = ValueNumber Float
+data EvaluatedValue = ValueNumber Double
                     | ValueName   String
                     | NoValue
                     | ValueNil
@@ -53,6 +53,9 @@ regInsertRange reg (id : ids) (value : values)  = regInsertRange (regInsert reg 
 
 regInsertRange2 :: Register -> ([RegisterId], [EvaluatedValue]) -> Register
 regInsertRange2 reg (ids, values) = regInsertRange reg ids values
+
+regLookupMaybe :: Register -> RegisterId -> Maybe EvaluatedValue
+regLookupMaybe (Register reg) id = Map.lookup id reg
 
 regLookup :: Register -> RegisterId -> EvaluatedValue
 regLookup (Register reg) id = regLookup' id $ Map.lookup id reg

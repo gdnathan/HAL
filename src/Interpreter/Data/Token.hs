@@ -10,6 +10,6 @@ module Interpreter.Data.Token where
 data Token  = ParenthesisOpen
             | ParenthesisClose
             | Quote
-            | Number Float
+            | Number Double
             | Symbol String
   deriving (Show)

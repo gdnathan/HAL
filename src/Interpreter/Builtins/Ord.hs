@@ -44,11 +44,11 @@ gtProcedure = compareProcedure (>)
 gteProcedure :: Register -> [Tree] -> EvaluatedValue
 gteProcedure = compareProcedure (>=)
 
-compareProcedure :: (Float -> Float -> Bool) -> Register -> [Tree] -> EvaluatedValue
+compareProcedure :: (Double -> Double -> Bool) -> Register -> [Tree] -> EvaluatedValue
 compareProcedure func reg [left, right] = compareProcedure' func (evaluateValue (Context (reg, left))) (evaluateValue (Context (reg, right)))
 compareProcedure _    _   _             = throw InvalidNumberOfArguments
 
-compareProcedure' :: (Float -> Float -> Bool) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
+compareProcedure' :: (Double -> Double -> Bool) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
 compareProcedure' func (ValueNumber left) (ValueNumber right)
                                           | left `func` right = ValueTrue
                                           | otherwise         = ValueFalse

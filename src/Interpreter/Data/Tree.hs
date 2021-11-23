@@ -7,7 +7,7 @@
 
 module Interpreter.Data.Tree where
 
-data ProcedureArg = Number Float
+data ProcedureArg = Number Double
                   | Symbol String
                   | UnCreatedList [Tree]
   deriving (Show)

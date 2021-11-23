@@ -29,7 +29,7 @@ data EvaluatedValue = ValueNumber Float
                     | List        (EvaluatedValue, EvaluatedValue)
                     | Procedure   (Register -> [Tree] -> EvaluatedValue)
 instance Show EvaluatedValue where
-      show (ValueNumber value)  = show value
+      show (ValueNumber value)  = show $ round value
       show (ValueName   value)  = value
       show NoValue              = ""
       show ValueNil             = "()"

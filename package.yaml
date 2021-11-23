@@ -1,0 +1,51 @@
+name:                hal
+version:             0.1.0.0
+github:              "EpitechPromo2024/B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard/hal"
+license:             BSD3
+author:              "Honoré Dupieu & Nathan Gardet-Derc & Guillaume Bogard-Coquard"
+maintainer:          "guillaume.bogard-coquard@epitech.eu"
+copyright:           "2021 Honoré Dupieu & Nathan Gardet-Derc & Guillaume Bogard-Coquard"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at https://github.com/EpitechPromo2024/B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard/hal
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  hal-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hal
+    - haskeline
+
+tests:
+  hal-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hal
+    - haskeline
+    - hspec

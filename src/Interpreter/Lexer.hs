@@ -1,11 +1,11 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
--- Lexer
+-- Interpreter Lexer
 --
 
-module Interpreter.Lexer  ( tokenize ) where
+module Interpreter.Lexer      ( tokenize ) where
 
 import GHC.Unicode            ( isDigit )
 import Control.Exception.Base ( throw )

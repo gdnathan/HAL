@@ -11,7 +11,7 @@ module CLIArguments.Parser  ( parseArgs
                             ) where
 
 import CLIArguments.Lexer   ( Token(..)
-                            , tokenizeArgs
+                            , tokenize
                             )
 
 data HalExecution = PrintHelp
@@ -21,7 +21,7 @@ data HalExecution = PrintHelp
 data HalConfig = HalConfig HalExecution [String]
 
 parseArgs :: [String] -> HalConfig
-parseArgs = parseTokenizedArgs . tokenizeArgs
+parseArgs = parseTokenizedArgs . tokenize
 
 parseTokenizedArgs :: [Token] -> HalConfig
 parseTokenizedArgs []     = defaultHalConfig

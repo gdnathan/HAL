@@ -12,7 +12,7 @@ import Test.Hspec               ( Spec
                                 )
 
 import CLIArguments.Lexer       ( Token(..)
-                                , tokenizeArgs
+                                , tokenize
                                 )
 
 newtype TestToken = TestToken Token
@@ -25,25 +25,25 @@ instance Eq TestToken where
 spec :: Spec
 spec = do
     it "Correct - No arguments given" $ do
-        null (map TestToken (tokenizeArgs []))
+        null (map TestToken (tokenize []))
     it "Correct - Only one file given" $ do
-        map TestToken (tokenizeArgs ["file1"])
+        map TestToken (tokenize ["file1"])
             == map TestToken [File "file1"]
     it "Correct - Multiple files given" $ do
-        map TestToken (tokenizeArgs ["file1", "file2", "file3"])
+        map TestToken (tokenize ["file1", "file2", "file3"])
             == map TestToken [File "file1", File "file2", File "file3"]
     it "Correct - Multiple files given REPL" $ do
-        map TestToken (tokenizeArgs ["-i", "file1", "file2", "file3"])
+        map TestToken (tokenize ["-i", "file1", "file2", "file3"])
             == map TestToken [LaunchRepl, File "file1", File "file2", File "file3"]
     it "Correct - short help option given" $ do
-        map TestToken (tokenizeArgs ["-h"])
+        map TestToken (tokenize ["-h"])
             == map TestToken [Help]
     it "Correct - long help option given" $ do
-        map TestToken (tokenizeArgs ["--help"])
+        map TestToken (tokenize ["--help"])
             == map TestToken [Help]
     it "Correct - short help option given" $ do
-        map TestToken (tokenizeArgs ["-i"])
+        map TestToken (tokenize ["-i"])
             == map TestToken [LaunchRepl]
     it "Correct - long help option given" $ do
-        map TestToken (tokenizeArgs ["--repl"])
+        map TestToken (tokenize ["--repl"])
             == map TestToken [LaunchRepl]

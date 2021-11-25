@@ -6,7 +6,7 @@
 --
 
 module CLIArguments.Lexer   ( Token(..)
-                            , tokenizeArgs
+                            , tokenize
                             ) where
 
 import Control.Exception    ( throw )
@@ -17,10 +17,10 @@ data Token = Help
            | LaunchRepl
            | File String
 
-tokenizeArgs :: [String] -> [Token]
-tokenizeArgs []                 = []
-tokenizeArgs (('-' : opt) : xs) = tokenizeOption opt : tokenizeArgs xs
-tokenizeArgs (x           : xs) = File x             : tokenizeArgs xs
+tokenize :: [String] -> [Token]
+tokenize []                 = []
+tokenize (('-' : opt) : xs) = tokenizeOption opt : tokenize xs
+tokenize (x           : xs) = File x             : tokenize xs
 
 tokenizeOption :: String -> Token
 tokenizeOption ('-' : xs) = tokenizeLongOption xs

@@ -1,16 +1,17 @@
-module Main               ( main ) where
+module Main                     ( main ) where
 
-import Test.Hspec         ( hspec
-                          , Spec
-                          , describe )
+import Test.Hspec               ( hspec
+                                , Spec
+                                , describe
+                                )
 
-import ArgumentLexerSpec  ( spec )
-import ArgumentParserSpec ( spec )
+import CLIArguments.LexerSpec   ( spec )
+import CLIArguments.ParserSpec  ( spec )
 
 main :: IO ()
 main = hspec Main.spec
 
 spec :: Spec
 spec = do
-    describe "ArgumentLexer"  ArgumentLexerSpec.spec
-    describe "ArgumentParser" ArgumentParserSpec.spec
+    describe "CLI Arguments Lexer"      CLIArguments.LexerSpec.spec
+    describe "CLI Arguments ParserSpec" CLIArguments.ParserSpec.spec

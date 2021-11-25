@@ -38,6 +38,9 @@ spec = do
     it "Correct - short help option given" $ do
         map TestToken (tokenize ["-h"])
             == map TestToken [Help]
+    it "Correct - short help option given after a correct argument" $ do
+        map TestToken (tokenize ["file1", "-h"])
+            == map TestToken [File "file1", Help]
     it "Correct - long help option given" $ do
         map TestToken (tokenize ["--help"])
             == map TestToken [Help]

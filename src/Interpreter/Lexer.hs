@@ -5,35 +5,42 @@
 -- Interpreter Lexer
 --
 
-module Interpreter.Lexer      ( tokenize ) where
+module Interpreter.Lexer        ( tokenize
+                                , Token(..)
+                                ) where
 
-import GHC.Unicode            ( isDigit )
-import Control.Exception.Base ( throw )
-import Text.Read              ( readMaybe )
+import GHC.Unicode              ( isDigit )
+import Control.Exception.Base   ( throw )
+import Text.Read                ( readMaybe )
 
-import Interpreter.Error      ( Error(..) )
-import Interpreter.Data.Token ( Token(..) )
+import Interpreter.Error        ( Error(..) )
 
-data LexingToken =  LParenthesisOpen
-                  | LParenthesisClose
-                  | LQuote
-                  | LSpace
-                  | LWord   String
+data Token  = ParenthesisOpen
+            | ParenthesisClose
+            | Quote
+            | Number Double
+            | Symbol String
+
+data InLexingToken =  LParenthesisOpen
+                    | LParenthesisClose
+                    | LQuote
+                    | LSpace
+                    | LWord   String
 
 tokenize :: String -> [Token]
 tokenize = convertLexingToken . foldr tokenize' []
 
-tokenize' :: Char -> [LexingToken] -> [LexingToken]
-tokenize' '('   t               = LParenthesisOpen  : t
-tokenize' ')'   t               = LParenthesisClose : t
-tokenize' '\''  t               = LQuote            : t
-tokenize' ' '   t               = LSpace            : t
-tokenize' '\t'  t               = LSpace            : t
-tokenize' '\n'  t               = LSpace            : t
-tokenize' x     (LWord a : ts)  = LWord (x : a)     : ts
-tokenize' x     t               = LWord [x]         : t
+tokenize' :: Char -> [InLexingToken] -> [InLexingToken]
+tokenize' '('   token                 = LParenthesisOpen  : token
+tokenize' ')'   token                 = LParenthesisClose : token
+tokenize' '\''  token                 = LQuote            : token
+tokenize' ' '   token                 = LSpace            : token
+tokenize' '\t'  token                 = LSpace            : token
+tokenize' '\n'  token                 = LSpace            : token
+tokenize' x     (LWord word : tokens) = LWord (x : word)  : tokens
+tokenize' x     token                 = LWord [x]         : token
 
-convertLexingToken :: [LexingToken] -> [Token]
+convertLexingToken :: [InLexingToken] -> [Token]
 convertLexingToken []                       = []
 convertLexingToken (LSpace            : xs) = convertLexingToken xs
 convertLexingToken (LParenthesisOpen  : xs) = ParenthesisOpen         : convertLexingToken xs

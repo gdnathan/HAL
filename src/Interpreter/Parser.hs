@@ -1,19 +1,17 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
--- Parser
+-- Interpreter Parser
 --
 
-module Interpreter.Parser       ( buildExpressionsTrees ) where
+module Interpreter.Parser             ( buildExpressionsTrees ) where
 
-import GHC.Exception            ( throw )
+import GHC.Exception                  ( throw )
 
-import Interpreter.Error        ( Error( InvalidSyntax ) )
-import Interpreter.Data.Token   ( Token(..) )
-import qualified Interpreter.Data.Token as Token
-import Interpreter.Data.Tree    ( Tree(..), ProcedureArg(..) )
-import qualified Interpreter.Data.Tree as Tree
+import Interpreter.Error              ( Error( InvalidSyntax ) )
+import Interpreter.Lexer as Lexer     ( Token(..) )
+import Interpreter.Data.Tree as Tree  ( Tree(..), ProcedureArg(..) )
 
 type UnderConstructionTree  = ([Token], Maybe Tree)
 type ParsedArgs             = ([Token], [Tree])
@@ -32,8 +30,8 @@ launchExprParse tokens = parseExpr (tokens, Nothing)
 parseExpr :: UnderConstructionTree -> UnderConstructionTree
 parseExpr (ParenthesisOpen            : xs, _   ) = wrapArgs $ getArgs xs
 parseExpr (ParenthesisClose           : xs, tree) = (xs, tree)
-parseExpr (Token.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Tree.Symbol str)
-parseExpr (Token.Number n             : xs, _   ) = (xs, Just $ Leaf $ Tree.Number n)
+parseExpr (Lexer.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Tree.Symbol str)
+parseExpr (Lexer.Number n             : xs, _   ) = (xs, Just $ Leaf $ Tree.Number n)
 parseExpr (Quote : ParenthesisOpen    : xs, _   ) = let (xss, res) = getArgs xs in (xss, Just $ Leaf $ UnCreatedList res)
 parseExpr (Quote                      : xs, _   ) = wrapArgsWithHeader (Leaf (Tree.Symbol "quote")) $ getArg xs
 parseExpr ([], tree)                              = ([], tree)

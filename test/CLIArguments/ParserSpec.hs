@@ -40,6 +40,9 @@ spec = do
     it "Correct - short help option given" $ do
         TestConfig (parseArgs ["-h"])
             == TestConfig (HalConfig PrintHelp [])
+    it "Correct - short help option given after a correct argument" $ do
+        TestConfig (parseArgs ["file1", "-h"])
+            == TestConfig (HalConfig PrintHelp [])
     it "Correct - long help option given" $ do
         TestConfig (parseArgs ["--help"])
             == TestConfig (HalConfig PrintHelp [])

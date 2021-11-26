@@ -25,7 +25,7 @@ data InLexingToken =  LParenthesisOpen
                     | LParenthesisClose
                     | LQuote
                     | LSpace
-                    | LWord   String
+                    | LWord String
 
 tokenize :: String -> [Token]
 tokenize = convertLexingToken . foldr tokenize' []

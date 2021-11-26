@@ -17,10 +17,10 @@ import Interpreter.Data.Register  ( Register
                                                   , List
                                                   )
                                   )
-import Interpreter.Data.Tree      ( Tree ( Node, Leaf )
+import Interpreter.Parser         ( Tree ( Node, Leaf )
                                   , ProcedureArg  ( Symbol
                                                   , Number
-                                                  , UnCreatedList
+                                                  , UncreatedList
                                                   )
                                   )
 import Interpreter.EvaluateValue  ( createList )
@@ -31,5 +31,5 @@ quote reg [Node []]                   = ValueNil
 quote reg [Node args]                 = createList reg args
 quote reg [Leaf (Number n)]           = ValueNumber n
 quote reg [Leaf (Symbol name)]        = ValueName name
-quote reg [Leaf (UnCreatedList list)] = List (ValueName "quote", createList reg list)
+quote reg [Leaf (UncreatedList list)] = List (ValueName "quote", createList reg list)
 quote _    _                          = throw InvalidNumberOfArguments

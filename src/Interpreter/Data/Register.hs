@@ -10,7 +10,7 @@ module Interpreter.Data.Register where
 import Data.Map ( Map, fromList )
 import qualified Data.Map as Map
 
-import Interpreter.Data.Tree  ( Tree (..) )
+import Interpreter.Parser     ( Tree(..) )
 import Control.Exception      ( throw )
 import Interpreter.Error      ( Error( UnknownName ) )
 

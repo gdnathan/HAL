@@ -25,7 +25,7 @@ import Interpreter.Data.Register  ( Register
                                                   , NoValue
                                                   ), regLookup, RegisterId (RegisterId)
                                   )
-import Interpreter.Data.Tree      ( Tree ( Node, Leaf )
+import Interpreter.Parser         ( Tree ( Node, Leaf )
                                   , ProcedureArg ( Symbol )
                                   )
 import Interpreter.EvaluateValue  ( evaluateValue

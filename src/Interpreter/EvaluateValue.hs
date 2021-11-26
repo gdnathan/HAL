@@ -14,7 +14,7 @@ import Data.Map                   ( Map, fromList )
 import qualified Data.Map as Map
 import Control.Exception          ( throw )
 
-import Interpreter.Data.Tree      ( Tree (..)
+import Interpreter.Parser         ( Tree (..)
                                   , ProcedureArg (..)
                                   )
 import Interpreter.Data.Register  ( Register(..)
@@ -39,7 +39,7 @@ evaluateNonProcedure _   (Number   n)          = ValueNumber n
 evaluateNonProcedure _   (Symbol   "#t")       = ValueTrue
 evaluateNonProcedure _   (Symbol   "#f")       = ValueFalse
 evaluateNonProcedure reg (Symbol   name)       = evaluateNonProcedure' name $ regLookupMaybe reg (RegisterId name)
-evaluateNonProcedure reg (UnCreatedList list)  = createList reg list
+evaluateNonProcedure reg (UncreatedList list)  = createList reg list
 
 evaluateNonProcedure' :: String -> Maybe EvaluatedValue -> EvaluatedValue
 evaluateNonProcedure' name  Nothing       = ValueName name

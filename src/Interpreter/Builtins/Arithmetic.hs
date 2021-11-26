@@ -22,7 +22,7 @@ import Interpreter.Error          ( Error ( InvalidNumberOfArguments
 import Interpreter.Data.Register  ( Register
                                   , EvaluatedValue( ValueNumber )
                                   )
-import Interpreter.Data.Tree      ( Tree )
+import Interpreter.Parser         ( Tree )
 import Interpreter.EvaluateValue  ( evaluateValue
                                   , EvaluatingContext( Context )
                                   )

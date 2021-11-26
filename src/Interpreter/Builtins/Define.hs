@@ -17,7 +17,7 @@ import Interpreter.Data.Register  ( regInsert
                                   , Register(..)
                                   , RegisterId(..)
                                   )
-import Interpreter.Data.Tree      ( Tree(..)
+import Interpreter.Parser         ( Tree(..)
                                   , ProcedureArg( Symbol )
                                   )
 import Interpreter.EvaluateValue  ( EvaluatingContext( Context )

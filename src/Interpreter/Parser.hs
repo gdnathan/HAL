@@ -5,24 +5,35 @@
 -- Interpreter Parser
 --
 
-module Interpreter.Parser             ( buildExpressionsTrees ) where
+module Interpreter.Parser           ( buildExpressionsTrees
+                                    , Tree(..)
+                                    , ProcedureArg(..)
+                                    ) where
 
-import GHC.Exception                  ( throw )
+import GHC.Exception                ( throw )
 
-import Interpreter.Error              ( Error( InvalidSyntax ) )
-import Interpreter.Lexer as Lexer     ( Token(..) )
-import Interpreter.Data.Tree as Tree  ( Tree(..), ProcedureArg(..) )
+import Interpreter.Error            ( Error( InvalidSyntax ) )
+import Interpreter.Lexer as Lexer   ( Token(..) )
+
+data ProcedureArg = Number Double
+                  | Symbol String
+                  | UncreatedList [Tree]
+  deriving (Show)
+
+data Tree = Node [Tree]
+          | Leaf ProcedureArg
+  deriving (Show)
 
 type UnderConstructionTree  = ([Token], Maybe Tree)
 type ParsedArgs             = ([Token], [Tree])
 
 buildExpressionsTrees :: [Token] -> [Tree]
-buildExpressionsTrees = loopBuilding . launchExprParse
+buildExpressionsTrees = constructTreesAndLoop . launchExprParse
 
-loopBuilding :: UnderConstructionTree -> [Tree]
-loopBuilding ([],     Just tree)  = [tree]
-loopBuilding (tokens, Just tree)  = tree : loopBuilding (launchExprParse tokens)
-loopBuilding (_,      Nothing)    = throw $ InvalidSyntax "an expression can not be empty"
+constructTreesAndLoop :: UnderConstructionTree -> [Tree]
+constructTreesAndLoop ([],     Just tree)  = [tree]
+constructTreesAndLoop (tokens, Just tree)  = tree : constructTreesAndLoop (launchExprParse tokens)
+constructTreesAndLoop (_,      Nothing)    = throw $ InvalidSyntax "an expression can not be empty"
 
 launchExprParse :: [Token] -> UnderConstructionTree
 launchExprParse tokens = parseExpr (tokens, Nothing)
@@ -30,28 +41,34 @@ launchExprParse tokens = parseExpr (tokens, Nothing)
 parseExpr :: UnderConstructionTree -> UnderConstructionTree
 parseExpr (ParenthesisOpen            : xs, _   ) = wrapArgs $ getArgs xs
 parseExpr (ParenthesisClose           : xs, tree) = (xs, tree)
-parseExpr (Lexer.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Tree.Symbol str)
-parseExpr (Lexer.Number n             : xs, _   ) = (xs, Just $ Leaf $ Tree.Number n)
-parseExpr (Quote : ParenthesisOpen    : xs, _   ) = let (xss, res) = getArgs xs in (xss, Just $ Leaf $ UnCreatedList res)
-parseExpr (Quote                      : xs, _   ) = wrapArgsWithHeader (Leaf (Tree.Symbol "quote")) $ getArg xs
+parseExpr (Lexer.Symbol str           : xs, _   ) = (xs, Just $ Leaf $ Interpreter.Parser.Symbol str)
+parseExpr (Lexer.Number n             : xs, _   ) = (xs, Just $ Leaf $ Interpreter.Parser.Number n)
+parseExpr (Quote : ParenthesisOpen    : xs, _   ) = wrapUncreatedList $ getArgs xs
+parseExpr (Quote                      : xs, _   ) = wrapArgsWithHeader (getArg  xs) $ Leaf $ Interpreter.Parser.Symbol "quote"
 parseExpr ([], tree)                              = ([], tree)
-
-wrapArgsWithHeader :: Tree -> ParsedArgs -> UnderConstructionTree
-wrapArgsWithHeader funcId (tokens, args) = (tokens, Just $ Node (funcId : args))
 
 wrapArgs :: ParsedArgs -> UnderConstructionTree
 wrapArgs (tokens, args) = (tokens, Just $ Node args)
 
+wrapUncreatedList :: ParsedArgs -> UnderConstructionTree
+wrapUncreatedList (tokens, args) = (tokens, Just $ Leaf $ UncreatedList args)
+
+wrapArgsWithHeader :: ParsedArgs -> Tree -> UnderConstructionTree
+wrapArgsWithHeader (tokens, args) funcId = (tokens, Just $ Node (funcId : args))
+
+getArgs :: [Token] -> ParsedArgs
+getArgs = getArgs' . launchExprParse
+
+getArgs' :: UnderConstructionTree -> ParsedArgs
+getArgs' (xs, Nothing)  = (xs, [])
+getArgs' (xs, Just arg) = getArgs'' arg $ getArgs xs
+
+getArgs'' :: Tree -> ParsedArgs -> ParsedArgs
+getArgs'' arg (tokens, trees) = (tokens, arg : trees)
+
 getArg :: [Token] -> ParsedArgs
-getArg tokens = getArg' $ launchExprParse tokens
+getArg = getArg' . launchExprParse
 
 getArg' :: UnderConstructionTree -> ParsedArgs
 getArg' (xs, Just arg) = (xs, [arg])
-getArg' (xs, Nothing ) = (xs, [])
-
-getArgs :: [Token] -> ParsedArgs
-getArgs tokens = getArgs' [] $ launchExprParse tokens
-
-getArgs' :: [Tree] -> UnderConstructionTree -> ParsedArgs
-getArgs' res (xs, Nothing) = (xs, res)
-getArgs' _   (xs, Just arg)   = let (xss, trees) = getArgs xs in (xss, arg : trees)
+getArg' (xs, Nothing)  = (xs, [])

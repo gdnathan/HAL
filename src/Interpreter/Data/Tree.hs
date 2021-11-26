@@ -7,11 +7,11 @@
 
 module Interpreter.Data.Tree where
 
-data ProcedureArg = Number Double
-                  | Symbol String
-                  | UnCreatedList [Tree]
-  deriving (Show)
+-- data ProcedureArg = Number Double
+--                   | Symbol String
+--                   | UncreatedList [Tree]
+--   deriving (Show)
 
-data Tree = Node    [Tree]
-          | Leaf    ProcedureArg
-  deriving (Show)
+-- data Tree = Node    [Tree]
+--           | Leaf    ProcedureArg
+--   deriving (Show)

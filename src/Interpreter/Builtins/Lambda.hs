@@ -17,7 +17,7 @@ import Interpreter.Data.Register    ( Register
                                     , regInsertRange2
                                     , RegisterId (RegisterId)
                                     )
-import Interpreter.Data.Tree        ( Tree ( Node, Leaf )
+import Interpreter.Parser           ( Tree ( Node, Leaf )
                                     , ProcedureArg (Symbol)
                                     )
 import Interpreter.Builtins.Define  ( createProcedure, createProcedure' )

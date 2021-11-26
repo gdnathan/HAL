@@ -23,7 +23,7 @@ import Interpreter.Data.Register  ( Register
                                                   , ValueFalse
                                                   )
                                   )
-import Interpreter.Data.Tree      ( Tree )
+import Interpreter.Parser         ( Tree )
 import Interpreter.EvaluateValue  ( evaluateValue
                                   , EvaluatingContext( Context )
                                   )

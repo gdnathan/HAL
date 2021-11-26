@@ -9,16 +9,16 @@ module Interpreter.EvaluateExpr     ( evaluateExpr
                                     , EvaluationResult(..)
                                     ) where
 
-import Interpreter.Data.Tree        ( ProcedureArg (..)
-                                    , Tree (..)
-                                    )
 import Interpreter.Data.Register    ( Register(..)
                                     , EvaluatedValue(..)
                                     , regLookup, regInsert
                                     )
 import Interpreter.EvaluateValue    ( EvaluatingContext(..), evaluateValue )
 import Interpreter.Builtins.Define  ( define )
-import Interpreter.Parser           ( buildExpressionsTrees )
+import Interpreter.Parser           ( buildExpressionsTrees
+                                    , ProcedureArg (..)
+                                    , Tree (..)
+                                    )
 import Interpreter.Lexer            ( tokenize )
 
 newtype EvaluationResult  = Result  (Register, EvaluatedValue)

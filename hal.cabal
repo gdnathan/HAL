@@ -74,6 +74,7 @@ test-suite hal-test
       CLIArguments.LexerSpec
       CLIArguments.ParserSpec
       Interpreter.LexerSpec
+      Interpreter.ParserSpec
       Paths_hal
   hs-source-dirs:
       test

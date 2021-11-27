@@ -5,22 +5,31 @@
 -- Register
 --
 
-module Interpreter.Data.Register where
+module Interpreter.Register   ( regInsert
+                              , regInsertRange
+                              , regInsertRange2
+                              , regLookup
+                              , RegisterId(..)
+                              , Register(..)
+                              , EvaluatedValue(..)
+                              ) where
 
-import Data.Map ( Map, fromList )
-import qualified Data.Map as Map
-
-import Interpreter.Parser     ( Tree(..) )
+import Data.Map as Map        ( Map
+                              , lookup
+                              , insert
+                              )
 import Control.Exception      ( throw )
+
 import Interpreter.Error      ( Error( UnknownName ) )
+import Interpreter.Lexer      ( NumbersType )
+import Interpreter.Parser     ( Tree )
 
 newtype RegisterId = RegisterId String
-  deriving (Ord, Eq, Show)
+  deriving (Eq, Ord)
 
 newtype Register = Register (Map RegisterId EvaluatedValue)
-  deriving (Show)
 
-data EvaluatedValue = ValueNumber Double
+data EvaluatedValue = ValueNumber NumbersType
                     | ValueName   String
                     | NoValue
                     | ValueNil
@@ -54,9 +63,6 @@ regInsertRange reg (id : ids) (value : values)  = regInsertRange (regInsert reg 
 regInsertRange2 :: Register -> ([RegisterId], [EvaluatedValue]) -> Register
 regInsertRange2 reg (ids, values) = regInsertRange reg ids values
 
-regLookupMaybe :: Register -> RegisterId -> Maybe EvaluatedValue
-regLookupMaybe (Register reg) id = Map.lookup id reg
-
 regLookup :: Register -> RegisterId -> EvaluatedValue
 regLookup (Register reg) id = regLookup' id $ Map.lookup id reg
 
@@ -65,14 +71,15 @@ regLookup' _               (Just value)  = value
 regLookup' (RegisterId id) Nothing       = throw $ UnknownName id
 
 showValueList :: EvaluatedValue -> String
-showValueList list = '(' : showValueList' False list ++ ")"
+showValueList = showValueList' True
 
 showValueList' :: Bool -> EvaluatedValue -> String
-showValueList' _      (List (left@(List _), right@(List _)))  =       showValueList' True left ++  " "  ++ showValueList' False right
-showValueList' _      (List (left@(List _), right))           =       showValueList' True left ++  " "  ++ showValueList' False right
-showValueList' _      (List (left,          right@(List _)))  =       showValueList' True left ++  " "  ++ showValueList' False right
-showValueList' False  (List (left,          ValueNil))        =       showValueList' True left
-showValueList' False  (List (left,          right))           =       showValueList' True left ++ " . " ++ showValueList' False right
-showValueList' True   (List (left,          ValueNil))        = '(' : showValueList' True left ++ ")"
-showValueList' True   (List (left,          right))           = '(' : showValueList' True left ++ " . " ++ showValueList' False right ++ ")"
-showValueList' _      other                                   = show other
+showValueList' _ (List (ValueName "quote",  List (val, ValueNil)))  = '\'' : show val
+showValueList' p (List (left,               right@(List _)))        = wrapWithParenthesis p $ showValueList' True left ++  ' '  :  showValueList' False right
+showValueList' p (List (left,               ValueNil))              = wrapWithParenthesis p $ showValueList' True left
+showValueList' p (List (left,               right))                 = wrapWithParenthesis p $ showValueList' True left ++ " . " ++ showValueList' False right
+showValueList' _ other                                              = show other
+
+wrapWithParenthesis :: Bool -> String -> String
+wrapWithParenthesis True  str = '(' : str ++ ")"
+wrapWithParenthesis False str = str

@@ -17,12 +17,12 @@ import Interpreter.Lexer        ( tokenize
 
 newtype TestToken = TestToken Token
 instance Eq TestToken where
-   (TestToken ParenthesisOpen)  == (TestToken ParenthesisOpen)  = True
-   (TestToken ParenthesisClose) == (TestToken ParenthesisClose) = True
-   (TestToken Quote)            == (TestToken Quote)            = True
-   (TestToken (Number n1))      == (TestToken (Number n2))      = n1 == n2
-   (TestToken (Symbol str1))    == (TestToken (Symbol str2))    = str1 == str2
-   _                            == _                            = False
+      (TestToken ParenthesisOpen)  == (TestToken ParenthesisOpen)  = True
+      (TestToken ParenthesisClose) == (TestToken ParenthesisClose) = True
+      (TestToken Quote)            == (TestToken Quote)            = True
+      (TestToken (Number n1))      == (TestToken (Number n2))      = n1 == n2
+      (TestToken (Symbol str1))    == (TestToken (Symbol str2))    = str1 == str2
+      _                            == _                            = False
 
 spec :: Spec
 spec = do

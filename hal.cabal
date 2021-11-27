@@ -37,13 +37,12 @@ library
       Interpreter.Builtins.Ord
       Interpreter.Builtins.Quote
       Interpreter.Builtins.Test
-      Interpreter.Data.Register
-      Interpreter.Data.Tree
       Interpreter.Error
       Interpreter.EvaluateExpr
       Interpreter.EvaluateValue
       Interpreter.Lexer
       Interpreter.Parser
+      Interpreter.Register
   other-modules:
       Paths_hal
   hs-source-dirs:
@@ -73,6 +72,7 @@ test-suite hal-test
   other-modules:
       CLIArguments.LexerSpec
       CLIArguments.ParserSpec
+      Interpreter.EvaluateExprSpec
       Interpreter.LexerSpec
       Interpreter.ParserSpec
       Paths_hal

@@ -7,6 +7,7 @@
 
 module Interpreter.Lexer        ( tokenize
                                 , Token(..)
+                                , NumbersType
                                 ) where
 
 import GHC.Unicode              ( isDigit )
@@ -15,10 +16,12 @@ import Text.Read                ( readMaybe )
 
 import Interpreter.Error        ( Error(..) )
 
+type NumbersType = Double
+
 data Token  = ParenthesisOpen
             | ParenthesisClose
             | Quote
-            | Number Double
+            | Number NumbersType
             | Symbol String
 
 data InLexingToken =  LParenthesisOpen
@@ -51,6 +54,6 @@ convertLexingToken (LWord str         : xs) = wordToWordOrNumber str  : convertL
 wordToWordOrNumber :: String -> Token
 wordToWordOrNumber str = wordToWordOrNumber' str $ readMaybe str
 
-wordToWordOrNumber' :: String -> Maybe Double -> Token
+wordToWordOrNumber' :: String -> Maybe NumbersType -> Token
 wordToWordOrNumber' name Nothing  = Symbol name
 wordToWordOrNumber' _    (Just n) = Number n

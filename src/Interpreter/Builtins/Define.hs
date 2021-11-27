@@ -12,10 +12,10 @@ import qualified Data.Map as Map
 import Control.Exception          ( throw )
 
 import Interpreter.Error          ( Error( InvalidNumberOfArguments, InvalidSyntax ) )
-import Interpreter.Data.Register  ( regInsert
+import Interpreter.Register       ( regInsert
                                   , EvaluatedValue( Procedure )
                                   , Register(..)
-                                  , RegisterId(..)
+                                  , RegisterId( RegisterId )
                                   )
 import Interpreter.Parser         ( Tree(..)
                                   , ProcedureArg( Symbol )
@@ -24,9 +24,9 @@ import Interpreter.EvaluateValue  ( EvaluatingContext( Context )
                                   , evaluateValue
                                   )
 
-define :: Register -> [Tree] -> (Register, String)
-define reg  [Leaf (Symbol name)                  , body] = (regInsert reg (RegisterId name) $ evaluateValue (Context (reg, body)) , name)
-define reg  [Node (Leaf (Symbol name) : argsName), body] = (regInsert reg (RegisterId name) $ createProcedure argsName body       , name)
+define :: Register -> [Tree] -> (Register, RegisterId)
+define reg  [Leaf (Symbol name)                  , body] = (regInsert reg (RegisterId name) $ evaluateValue (Context (reg, body)) , RegisterId name)
+define reg  [Node (Leaf (Symbol name) : argsName), body] = (regInsert reg (RegisterId name) $ createProcedure argsName body       , RegisterId name)
 define _               _                                 = throw $ InvalidSyntax "Invalid define definition"
 
 createProcedure :: [Tree] -> Tree -> EvaluatedValue

@@ -17,7 +17,7 @@ import Interpreter.Error          ( Error ( InvalidNumberOfArguments
                                           )
                                   , BuiltInError ( ArgumentIsNotAPair )
                                   )
-import Interpreter.Data.Register  ( Register
+import Interpreter.Register       ( Register
                                   , EvaluatedValue( List )
                                   )
 import Interpreter.Parser         ( Tree )
@@ -28,7 +28,7 @@ import Interpreter.EvaluateValue  ( evaluateValue
 --- Builtin ---
 cons :: Register -> [Tree] -> EvaluatedValue
 cons reg [left, right]  = List (evaluateValue $ Context (reg, left), evaluateValue $ Context (reg, right))
-cons _   _              = throw InvalidNumberOfArguments
+cons _   _              = throw $ BuiltInError "cdr" ArgumentIsNotAPair
 
 --- Builtin ---
 car :: Register -> [Tree] -> EvaluatedValue

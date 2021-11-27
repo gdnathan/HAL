@@ -1,14 +1,14 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- All
 --
 
-module Interpreter.Builtins.All ( initialRegister ) where
+module Interpreter.Builtins.All         ( initialRegister ) where
 
 import Data.Map                         ( fromList )
-import Interpreter.Data.Register        ( Register ( Register )
+import Interpreter.Register             ( Register ( Register )
                                         , RegisterId ( RegisterId )
                                         , EvaluatedValue ( Procedure )
                                         )

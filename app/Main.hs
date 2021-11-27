@@ -19,7 +19,7 @@ import CLIArguments.Parser        ( parseArgs
 import CLIArguments.Error         ( Error( ArgumentParsingError ) )
 import Interpreter.Error          ( Error )
 import Interpreter.EvaluateExpr   ( evaluateExpr, EvaluationResult(..) )
-import Interpreter.Data.Register  ( EvaluatedValue, Register )
+import Interpreter.Register       ( EvaluatedValue, Register )
 import Interpreter.Builtins.All   ( initialRegister )
 
 main :: IO ()

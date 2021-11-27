@@ -17,7 +17,7 @@ import Interpreter.Error          ( Error ( InvalidNumberOfArguments
                                           , InvalidSyntax
                                           )
                                   )
-import Interpreter.Data.Register  ( Register
+import Interpreter.Register       ( Register
                                   , EvaluatedValue( List
                                                   , ValueFalse
                                                   , ValueTrue

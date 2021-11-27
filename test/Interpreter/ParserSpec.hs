@@ -20,11 +20,11 @@ import Interpreter.Lexer        ( tokenize )
 
 newtype TestTree = TestTree Tree
 instance Eq TestTree where
-   (TestTree (Node left_trees))                 == (TestTree (Node right_trees))                    = map TestTree left_trees   == map TestTree right_trees
-   (TestTree (Leaf (Number left_value)))        == (TestTree (Leaf (Number right_value)))           = left_value                == right_value
-   (TestTree (Leaf (Symbol left_symbol)))       == (TestTree (Leaf (Symbol right_symbol)))          = left_symbol               == right_symbol
-   (TestTree (Leaf (UncreatedList left_trees))) == (TestTree (Leaf (UncreatedList right_trees)))    = map TestTree left_trees   == map TestTree right_trees
-   _                                            == _                                                = False
+      (TestTree (Node left_trees))                 == (TestTree (Node right_trees))                    = map TestTree left_trees   == map TestTree right_trees
+      (TestTree (Leaf (Number left_value)))        == (TestTree (Leaf (Number right_value)))           = left_value                == right_value
+      (TestTree (Leaf (Symbol left_symbol)))       == (TestTree (Leaf (Symbol right_symbol)))          = left_symbol               == right_symbol
+      (TestTree (Leaf (UncreatedList left_trees))) == (TestTree (Leaf (UncreatedList right_trees)))    = map TestTree left_trees   == map TestTree right_trees
+      _                                            == _                                                = False
 
 spec :: Spec
 spec = do
@@ -139,27 +139,28 @@ spec = do
               ]
             ]
     it "Correct - merge sort" $ do
-        map TestTree (buildExpressionsTrees (tokenize (
-            "(define (null? l) (eq? l '()))" ++
-            "(define (merge-lists l1 l2)" ++
-            "   (cond ((null? l1) l2)" ++
-            "       ((null? l2) l1)" ++
-            "       ((< (car l1) (car l2)) (cons (car l1) (merge-lists (cdr l1) l2)))" ++
-            "       (#t                    (cons (car l2) (merge-lists l1 (cdr l2))))))" ++
-            "" ++
-            "(define (split-half l l1 l2)" ++
-            "   (cond ((null? l) (cons l1 l2))" ++
-            "       ((null? (cdr l)) (split-half (cdr l) (cons (car l) l1) l2))" ++
-            "       (#t (split-half (cdr (cdr l))" ++
-            "                       (cons (car l) l1)" ++
-            "                       (cons (car (cdr l)) l2)))))" ++
-            "" ++
-            "(define (merge-sort lst)" ++
-            "   (cond ((null? lst) '())" ++
-            "       ((null? (cdr lst)) lst)" ++
-            "       (#t (let ((lsts (split-half lst '() '())))" ++
-            "               (merge-lists (merge-sort (car lsts))" ++
-            "                           (merge-sort (cdr lsts)))))))")))
+        map TestTree (buildExpressionsTrees (tokenize
+            "(define (null? l) (eq? l '()))                                               \
+            \                                                                             \
+            \(define (merge-lists l1 l2)                                                  \
+            \  (cond ((null? l1) l2)                                                      \
+            \        ((null? l2) l1)                                                      \
+            \        ((< (car l1) (car l2)) (cons (car l1) (merge-lists (cdr l1) l2)))    \
+            \        (#t                    (cons (car l2) (merge-lists l1 (cdr l2))))))  \
+            \                                                                             \
+            \(define (split-half l l1 l2)                                                 \
+            \  (cond ((null? l) (cons l1 l2))                                             \
+            \        ((null? (cdr l)) (split-half (cdr l) (cons (car l) l1) l2))          \
+            \        (#t (split-half (cdr (cdr l))                                        \
+            \                        (cons (car l) l1)                                    \
+            \                        (cons (car (cdr l)) l2)))))                          \
+            \                                                                             \
+            \(define (merge-sort lst)                                                     \
+            \  (cond ((null? lst) '())                                                    \
+            \        ((null? (cdr lst)) lst)                                              \
+            \        (#t (let ((lsts (split-half lst '() '())))                           \
+            \              (merge-lists (merge-sort (car lsts))                           \
+            \                           (merge-sort (cdr lsts)))))))"))
             == map TestTree [
                 Node [
                   Leaf (Symbol "define"),

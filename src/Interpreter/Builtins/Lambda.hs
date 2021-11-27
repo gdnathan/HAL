@@ -12,7 +12,7 @@ module Interpreter.Builtins.Lambda  ( lambda
 import Control.Exception            ( throw )
 
 import Interpreter.Error            ( Error ( InvalidNumberOfArguments, InvalidSyntax ) )
-import Interpreter.Data.Register    ( Register
+import Interpreter.Register         ( Register
                                     , EvaluatedValue
                                     , regInsertRange2
                                     , RegisterId (RegisterId)
@@ -21,15 +21,16 @@ import Interpreter.Parser           ( Tree ( Node, Leaf )
                                     , ProcedureArg (Symbol)
                                     )
 import Interpreter.Builtins.Define  ( createProcedure, createProcedure' )
-import Interpreter.EvaluateValue    ( createList
-                                    , evaluateValue
+import Interpreter.EvaluateValue    ( -- createList
+                                     evaluateValue
                                     , EvaluatingContext( Context )
                                     )
+import Interpreter.Builtins.Quote   ( createList )
 
 --- Builtin ---
 lambda :: Register -> [Tree] -> EvaluatedValue
 lambda reg [Node argsName             , body] = createProcedure argsName body
-lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\reg args -> [createList reg args]) [listName] body
+lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\reg args -> [createList args]) [listName] body
 lambda _   [_                         , _]    = throw $ InvalidSyntax "variable name must be a string"
 lambda _    _                                 = throw InvalidNumberOfArguments
 

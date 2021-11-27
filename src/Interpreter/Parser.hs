@@ -13,16 +13,16 @@ module Interpreter.Parser           ( buildExpressionsTrees
 import GHC.Exception                ( throw )
 
 import Interpreter.Error            ( Error( InvalidSyntax ) )
-import Interpreter.Lexer as Lexer   ( Token(..) )
+import Interpreter.Lexer as Lexer   ( Token(..)
+                                    , NumbersType
+                                    )
 
-data ProcedureArg = Number Double
+data ProcedureArg = Number NumbersType
                   | Symbol String
                   | UncreatedList [Tree]
-  deriving (Show)
 
 data Tree = Node [Tree]
           | Leaf ProcedureArg
-  deriving (Show)
 
 type UnderConstructionTree  = ([Token], Maybe Tree)
 type ParsedArgs             = ([Token], [Tree])

@@ -1,2 +1,12 @@
 .stack-work/
 *~
+.vscode
+hal
+
+# tmpfiles
+*[Tt][Mm][Pp]*
+*[Tt][Oo][ _\-][Dd][Ee][Ll]*
+*[Tt][Oo][Dd][Ee][Ll]*
+*zip*
+
+

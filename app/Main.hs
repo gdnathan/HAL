@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Main
 --
@@ -19,7 +19,7 @@ import CLIArguments.Parser        ( parseArgs
 import CLIArguments.Error         ( Error( ArgumentParsingError ) )
 import Interpreter.Error          ( Error )
 import Interpreter.EvaluateExpr   ( evaluateExpr, EvaluationResult(..) )
-import Interpreter.Data.Register  ( EvaluatedValue, Register )
+import Interpreter.Register       ( EvaluatedValue, Register )
 import Interpreter.Builtins.All   ( initialRegister )
 
 main :: IO ()
@@ -45,7 +45,7 @@ dispatchExecutions' (HalConfig PrintHelp  _)                  _   = printHelp
 dispatchExecutions' (HalConfig Evaluate   [fileContent])      reg = print $ resVal $ evaluateExpr reg fileContent
 dispatchExecutions' (HalConfig exec       (fileContent : xs)) reg = dispatchExecutions' (HalConfig exec xs) $ resReg $ evaluateExpr reg fileContent
 dispatchExecutions' (HalConfig Repl       [])                 reg = infiniteLoop reg
-dispatchExecutions' (HalConfig Evaluate   [])                 reg = throw $ ArgumentParsingError "nothing to evaluate."
+dispatchExecutions' (HalConfig Evaluate   [])                 _   = throw $ ArgumentParsingError "nothing to evaluate."
 
 resVal :: EvaluationResult -> EvaluatedValue
 resVal (Result (_, val)) = val
@@ -54,16 +54,21 @@ resReg :: EvaluationResult -> Register
 resReg (Result (reg, _)) = reg
 
 printHelp :: IO ()
-printHelp = putStrLn "This is a help."
+printHelp = putStrLn  "./hal [files | flags] ...\
+                      \ (none)  -> launch the REPL\
+                      \ files   -> a list of files to be interpreted\
+                      \ flags   ->\
+                      \     -h | --help  -> display this help\
+                      \     -i           -> launch the REPL"
 
 infiniteLoop :: Register -> IO ()
-infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' reg line)
+infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' $ evaluateExpr reg line)
 
-infiniteLoop' :: Register -> String -> IO ()
-infiniteLoop' reg line = let (Result (newReg, res)) = evaluateExpr reg line in print res >> infiniteLoop newReg
+infiniteLoop' :: EvaluationResult -> IO ()
+infiniteLoop' (Result (newReg, res)) = print res >> infiniteLoop newReg
 
 handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
-handleCLIArgumentsErrors error = putStrLn ("CLI Exception: " ++ show error) >> exitWith (ExitFailure 84)
+handleCLIArgumentsErrors errorType = putStrLn ("CLI Exception: " ++ show errorType) >> exitWith (ExitFailure 84)
 
 handleInterpreterErrors :: Interpreter.Error.Error -> IO ()
-handleInterpreterErrors error = putStrLn ("Exception: " ++ show error) >> exitWith (ExitFailure 84)
+handleInterpreterErrors errorType = putStrLn ("Exception: " ++ show errorType) >> exitWith (ExitFailure 84)

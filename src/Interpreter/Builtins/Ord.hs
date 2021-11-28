@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Ord
 --
@@ -17,16 +17,17 @@ import Interpreter.Error          ( Error ( InvalidNumberOfArguments
                                           , ArgumentIsNotNumber
                                           )
                                   )
-import Interpreter.Data.Register  ( Register
+import Interpreter.Register       ( Register
                                   , EvaluatedValue( ValueNumber
                                                   , ValueTrue
                                                   , ValueFalse
                                                   )
                                   )
-import Interpreter.Data.Tree      ( Tree )
+import Interpreter.Parser         ( Tree )
 import Interpreter.EvaluateValue  ( evaluateValue
                                   , EvaluatingContext( Context )
                                   )
+import Interpreter.Lexer          ( NumbersType )
 
 --- Builtin ---
 ltProcedure :: Register -> [Tree] -> EvaluatedValue
@@ -44,12 +45,12 @@ gtProcedure = compareProcedure (>)
 gteProcedure :: Register -> [Tree] -> EvaluatedValue
 gteProcedure = compareProcedure (>=)
 
-compareProcedure :: (Double -> Double -> Bool) -> Register -> [Tree] -> EvaluatedValue
+compareProcedure :: (NumbersType -> NumbersType -> Bool) -> Register -> [Tree] -> EvaluatedValue
 compareProcedure func reg [left, right] = compareProcedure' func (evaluateValue (Context (reg, left))) (evaluateValue (Context (reg, right)))
 compareProcedure _    _   _             = throw InvalidNumberOfArguments
 
-compareProcedure' :: (Double -> Double -> Bool) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
+compareProcedure' :: (NumbersType -> NumbersType -> Bool) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
 compareProcedure' func (ValueNumber left) (ValueNumber right)
-                                          | left `func` right = ValueTrue
-                                          | otherwise         = ValueFalse
+    | left `func` right                                       = ValueTrue
+    | otherwise                                               = ValueFalse
 compareProcedure' _    _                  _                   = throw ArgumentIsNotNumber

@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Error
 --
@@ -12,7 +12,6 @@ module Interpreter.Error  ( Error(..)
 import GHC.Exception ( Exception )
 
 type ProbableReason = String
-type ExpressionName = String
 type Name           = String
 type BuiltInName    = String
 
@@ -29,13 +28,13 @@ data Error = InternalError        ProbableReason
            | ArgumentIsNotNumber
            | DividingByZero
 instance Show Error where
-  show (InternalError       _)    = "an unexpected error happened"
-  show (UnknownName         name) = "variable " ++ name ++ " is not bound"
-  show (InvalidSyntax       _)    = "invalid syntax"
-  show InvalidNumberOfArguments   = "incorrect argument count"
-  show NotAProcedure              = "attempt to apply non-procedure"
-  show ArgumentIsNotNumber        = "attempt to apply non-number"
-  show (BuiltInError  name error) = name ++ ": " ++ show error
-  show DividingByZero             = "division by zero is not allowed"
+  show (InternalError       _)          = "an unexpected error happened"
+  show (UnknownName         name)       = "variable " ++ name ++ " is not bound"
+  show (InvalidSyntax       _)          = "invalid syntax"
+  show InvalidNumberOfArguments         = "incorrect argument count"
+  show NotAProcedure                    = "attempt to apply non-procedure"
+  show ArgumentIsNotNumber              = "attempt to apply non-number"
+  show (BuiltInError  name errorMsg)    = name ++ ": " ++ show errorMsg
+  show DividingByZero                   = "division by zero is not allowed"
 
 instance Exception Error

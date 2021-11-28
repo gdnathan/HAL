@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Lambda
 --
@@ -12,25 +12,25 @@ module Interpreter.Builtins.Lambda  ( lambda
 import Control.Exception            ( throw )
 
 import Interpreter.Error            ( Error ( InvalidNumberOfArguments, InvalidSyntax ) )
-import Interpreter.Data.Register    ( Register
+import Interpreter.Register         ( regInsertRange2
+                                    , Register
                                     , EvaluatedValue
-                                    , regInsertRange2
-                                    , RegisterId (RegisterId)
+                                    , RegisterId( RegisterId )
                                     )
-import Interpreter.Data.Tree        ( Tree ( Node, Leaf )
+import Interpreter.Parser           ( Tree ( Node, Leaf )
                                     , ProcedureArg (Symbol)
                                     )
 import Interpreter.Builtins.Define  ( createProcedure, createProcedure' )
-import Interpreter.EvaluateValue    ( createList
-                                    , evaluateValue
+import Interpreter.EvaluateValue    ( evaluateValue
                                     , EvaluatingContext( Context )
                                     )
+import Interpreter.Builtins.Quote   ( createList )
 
 --- Builtin ---
 lambda :: Register -> [Tree] -> EvaluatedValue
-lambda reg [Node argsName             , body] = createProcedure argsName body
-lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\reg args -> [createList reg args]) [listName] body
-lambda _   [_                         , _]    = throw $ InvalidSyntax "variable name must be a string"
+lambda _   [Node argsName             , body] = createProcedure argsName body
+lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\_ args -> [createList args]) [listName] body
+lambda _   [_                         , _   ] = throw $ InvalidSyntax "variable name must be a string"
 lambda _    _                                 = throw InvalidNumberOfArguments
 
 --- Builtin ---
@@ -39,9 +39,8 @@ letProcedure reg [Node args, body]  = evaluateValue (Context (regInsertRange2 re
 letProcedure _    _                 = throw InvalidNumberOfArguments
 
 getLetArgs :: Register -> [Tree] -> ([RegisterId], [EvaluatedValue])
-getLetArgs reg []                                         = ([], [])
-getLetArgs reg (Node [Leaf (Symbol varName), value] : xs) = getLetArgs' reg xs (RegisterId varName) $ evaluateValue $ Context (reg, value)
-getLetArgs _    _                                         = throw $ InvalidSyntax "missing bound value definition"
+getLetArgs reg = foldl (getLetArgs' reg) ([], [])
 
-getLetArgs' :: Register -> [Tree] -> RegisterId -> EvaluatedValue -> ([RegisterId], [EvaluatedValue])
-getLetArgs' reg xs varName value = let (ids, values) = getLetArgs reg xs in (varName : ids, value : values)
+getLetArgs' :: Register -> ([RegisterId], [EvaluatedValue]) -> Tree -> ([RegisterId], [EvaluatedValue])
+getLetArgs' reg (ids, values) (Node [Leaf (Symbol varName), value]) = (RegisterId varName : ids, evaluateValue (Context (reg, value)) : values)
+getLetArgs' _   _             _                                     = throw $ InvalidSyntax "missing bound value definition"

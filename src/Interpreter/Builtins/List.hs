@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- List
 --
@@ -17,10 +17,10 @@ import Interpreter.Error          ( Error ( InvalidNumberOfArguments
                                           )
                                   , BuiltInError ( ArgumentIsNotAPair )
                                   )
-import Interpreter.Data.Register  ( Register
+import Interpreter.Register       ( Register
                                   , EvaluatedValue( List )
                                   )
-import Interpreter.Data.Tree      ( Tree )
+import Interpreter.Parser         ( Tree )
 import Interpreter.EvaluateValue  ( evaluateValue
                                   , EvaluatingContext( Context )
                                   )
@@ -28,7 +28,7 @@ import Interpreter.EvaluateValue  ( evaluateValue
 --- Builtin ---
 cons :: Register -> [Tree] -> EvaluatedValue
 cons reg [left, right]  = List (evaluateValue $ Context (reg, left), evaluateValue $ Context (reg, right))
-cons _   _              = throw InvalidNumberOfArguments
+cons _   _              = throw $ BuiltInError "cdr" ArgumentIsNotAPair
 
 --- Builtin ---
 car :: Register -> [Tree] -> EvaluatedValue

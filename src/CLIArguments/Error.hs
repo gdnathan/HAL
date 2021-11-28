@@ -1,13 +1,13 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
--- Error
+-- CLIArguments Error
 --
 
-module CLIArguments.Error   ( Error(..) ) where
+module CLIArguments.Error ( Error(..) ) where
 
-import GHC.Exception ( Exception )
+import GHC.Exception      ( Exception )
 
 type OptionName = String
 

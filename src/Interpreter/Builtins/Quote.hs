@@ -1,35 +1,41 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Quote
 --
 
-module Interpreter.Builtins.Quote ( quote ) where
+module Interpreter.Builtins.Quote ( quote, createList ) where
 
 import Control.Exception          ( throw )
 
 import Interpreter.Error          ( Error ( InvalidNumberOfArguments ) )
-import Interpreter.Data.Register  ( Register
+import Interpreter.Register       ( Register
                                   , EvaluatedValue( ValueNil
                                                   , ValueNumber
                                                   , ValueName
                                                   , List
                                                   )
                                   )
-import Interpreter.Data.Tree      ( Tree ( Node, Leaf )
+import Interpreter.Parser         ( Tree ( Node, Leaf )
                                   , ProcedureArg  ( Symbol
                                                   , Number
-                                                  , UnCreatedList
+                                                  , UncreatedList
                                                   )
                                   )
-import Interpreter.EvaluateValue  ( createList )
 
 --- Builtin ---
 quote :: Register -> [Tree] -> EvaluatedValue
-quote reg [Node []]                   = ValueNil
-quote reg [Node args]                 = createList reg args
-quote reg [Leaf (Number n)]           = ValueNumber n
-quote reg [Leaf (Symbol name)]        = ValueName name
-quote reg [Leaf (UnCreatedList list)] = List (ValueName "quote", createList reg list)
-quote _    _                          = throw InvalidNumberOfArguments
+quote _ = quote'
+
+quote' :: [Tree] -> EvaluatedValue
+quote' [Node []]                    = ValueNil
+quote' [Node args]                  = createList args
+quote' [Leaf (UncreatedList list)]  = List (ValueName "quote", List (createList list, ValueNil))
+quote' [Leaf (Number n)]            = ValueNumber n
+quote' [Leaf (Symbol n)]            = ValueName n
+quote' _                            = throw InvalidNumberOfArguments
+
+createList :: [Tree] -> EvaluatedValue
+createList []          = ValueNil
+createList (left : xs) = List (quote' [left], createList xs)

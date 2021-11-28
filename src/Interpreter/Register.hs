@@ -38,7 +38,7 @@ data EvaluatedValue = ValueNumber NumbersType
                     | List        (EvaluatedValue, EvaluatedValue)
                     | Procedure   (Register -> [Tree] -> EvaluatedValue)
 instance Show EvaluatedValue where
-      show (ValueNumber value)  = show $ round value
+      show (ValueNumber value)  = show (round value :: Integer)
       show (ValueName   value)  = value
       show NoValue              = ""
       show ValueNil             = "()"
@@ -48,22 +48,22 @@ instance Show EvaluatedValue where
       show (Procedure _)        = "#<procedure>"
 
 regInsert :: Register -> RegisterId -> EvaluatedValue -> Register
-regInsert (Register reg) id value = Register $ Map.insert id value reg
+regInsert (Register reg) rId value = Register $ Map.insert rId value reg
 
 regInsertRange :: Register -> [RegisterId] -> [EvaluatedValue] -> Register
 regInsertRange reg  []        _                 = reg
 regInsertRange reg  _         []                = reg
-regInsertRange reg (id : ids) (value : values)  = regInsertRange (regInsert reg id value) ids values
+regInsertRange reg (rId : ids) (value : values)  = regInsertRange (regInsert reg rId value) ids values
 
 regInsertRange2 :: Register -> ([RegisterId], [EvaluatedValue]) -> Register
 regInsertRange2 reg (ids, values) = regInsertRange reg ids values
 
 regLookup :: Register -> RegisterId -> EvaluatedValue
-regLookup (Register reg) id = regLookup' id $ Map.lookup id reg
+regLookup (Register reg) rId = regLookup' rId $ Map.lookup rId reg
 
 regLookup' :: RegisterId -> Maybe EvaluatedValue -> EvaluatedValue
 regLookup' _               (Just value)  = value
-regLookup' (RegisterId id) Nothing       = throw $ UnknownName id
+regLookup' (RegisterId rId) Nothing       = throw $ UnknownName rId
 
 showValueList :: EvaluatedValue -> String
 showValueList = showValueList' True

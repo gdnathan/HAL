@@ -28,8 +28,8 @@ import Interpreter.Builtins.Quote   ( createList )
 
 --- Builtin ---
 lambda :: Register -> [Tree] -> EvaluatedValue
-lambda reg [Node argsName             , body] = createProcedure argsName body
-lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\reg args -> [createList args]) [listName] body
+lambda _   [Node argsName             , body] = createProcedure argsName body
+lambda _   [listName@(Leaf (Symbol _)), body] = createProcedure' (\_ args -> [createList args]) [listName] body
 lambda _   [_                         , _   ] = throw $ InvalidSyntax "variable name must be a string"
 lambda _    _                                 = throw InvalidNumberOfArguments
 

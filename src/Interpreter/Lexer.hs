@@ -10,11 +10,7 @@ module Interpreter.Lexer        ( tokenize
                                 , NumbersType
                                 ) where
 
-import GHC.Unicode              ( isDigit )
-import Control.Exception.Base   ( throw )
 import Text.Read                ( readMaybe )
-
-import Interpreter.Error        ( Error(..) )
 
 type NumbersType = Double
 

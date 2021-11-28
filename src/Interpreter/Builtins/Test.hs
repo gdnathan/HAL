@@ -13,7 +13,6 @@ module Interpreter.Builtins.Test  ( isEq
 import Control.Exception          ( throw )
 
 import Interpreter.Error          ( Error ( InvalidNumberOfArguments
-                                          , NotAProcedure
                                           , InvalidSyntax
                                           )
                                   )
@@ -23,10 +22,9 @@ import Interpreter.Register       ( Register
                                                   , ValueTrue
                                                   , ValueName
                                                   , NoValue, ValueNumber, ValueNil
-                                                  ), regLookup, RegisterId (RegisterId)
+                                                  )
                                   )
 import Interpreter.Parser         ( Tree ( Node, Leaf )
-                                  , ProcedureArg ( Symbol )
                                   )
 import Interpreter.EvaluateValue  ( evaluateValue
                                   , EvaluatingContext( Context )
@@ -60,9 +58,9 @@ cond _   []   = throw InvalidNumberOfArguments
 cond reg args = cond' reg args
 
 cond' :: Register -> [Tree] -> EvaluatedValue
-cond' reg (Node (head : values) : args) = cond'' (evaluateValue $ Context (reg, head)) values reg args
+cond' reg (Node (condition : values) : args) = cond'' (evaluateValue $ Context (reg, condition)) values reg args
 cond' _   []                            = NoValue
-cond' reg (Node []              : xs)   = throw $ InvalidSyntax "must have at least one value to return"
+cond' _   (Node []              : _)    = throw $ InvalidSyntax "must have at least one value to return"
 cond' _   (Leaf _               : _)    = throw $ InvalidSyntax "argument(s) must be an expression"
 
 cond'' :: EvaluatedValue -> [Tree] -> Register -> [Tree] -> EvaluatedValue

@@ -10,7 +10,6 @@ module Interpreter.Builtins.Define  ( define
                                     , createProcedure'
                                     ) where
 
-import Data.Map                     ( insert )
 import Control.Exception            ( throw )
 
 import Interpreter.Error            ( Error( InvalidNumberOfArguments

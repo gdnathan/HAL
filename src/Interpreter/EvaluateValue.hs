@@ -26,8 +26,8 @@ newtype EvaluatingContext = Context (Register, Tree)
 
 evaluateValue :: EvaluatingContext -> EvaluatedValue
 evaluateValue (Context (reg, Leaf arg))                         = evaluateNonProcedure reg arg
-evaluateValue (Context (reg, Node (Leaf (Symbol id)  : args)))  = callProcedure reg args $ regLookup reg $ RegisterId id
-evaluateValue (Context (reg, Node (id@(Node _)       : args)))  = callProcedure reg args $ evaluateValue $ Context (reg, id)
+evaluateValue (Context (reg, Node (Leaf (Symbol rId)  : args)))  = callProcedure reg args $ regLookup reg $ RegisterId rId
+evaluateValue (Context (reg, Node (rId@(Node _)       : args)))  = callProcedure reg args $ evaluateValue $ Context (reg, rId)
 evaluateValue _                                                 = throw NotAProcedure
 
 evaluateNonProcedure :: Register -> ProcedureArg -> EvaluatedValue
@@ -35,7 +35,7 @@ evaluateNonProcedure _   (Number        n)     = ValueNumber n
 evaluateNonProcedure _   (Symbol        "#t")  = ValueTrue
 evaluateNonProcedure _   (Symbol        "#f")  = ValueFalse
 evaluateNonProcedure reg (Symbol        name)  = regLookup reg $ RegisterId name
-evaluateNonProcedure reg (UncreatedList list)  = createList list
+evaluateNonProcedure _   (UncreatedList list)  = createList list
 
 callProcedure :: Register -> [Tree] -> EvaluatedValue -> EvaluatedValue
 callProcedure reg args (Procedure body) = body reg args

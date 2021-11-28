@@ -45,7 +45,7 @@ dispatchExecutions' (HalConfig PrintHelp  _)                  _   = printHelp
 dispatchExecutions' (HalConfig Evaluate   [fileContent])      reg = print $ resVal $ evaluateExpr reg fileContent
 dispatchExecutions' (HalConfig exec       (fileContent : xs)) reg = dispatchExecutions' (HalConfig exec xs) $ resReg $ evaluateExpr reg fileContent
 dispatchExecutions' (HalConfig Repl       [])                 reg = infiniteLoop reg
-dispatchExecutions' (HalConfig Evaluate   [])                 reg = throw $ ArgumentParsingError "nothing to evaluate."
+dispatchExecutions' (HalConfig Evaluate   [])                 _   = throw $ ArgumentParsingError "nothing to evaluate."
 
 resVal :: EvaluationResult -> EvaluatedValue
 resVal (Result (_, val)) = val
@@ -68,7 +68,7 @@ infiniteLoop' :: EvaluationResult -> IO ()
 infiniteLoop' (Result (newReg, res)) = print res >> infiniteLoop newReg
 
 handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
-handleCLIArgumentsErrors error = putStrLn ("CLI Exception: " ++ show error) >> exitWith (ExitFailure 84)
+handleCLIArgumentsErrors errorType = putStrLn ("CLI Exception: " ++ show errorType) >> exitWith (ExitFailure 84)
 
 handleInterpreterErrors :: Interpreter.Error.Error -> IO ()
-handleInterpreterErrors error = putStrLn ("Exception: " ++ show error) >> exitWith (ExitFailure 84)
+handleInterpreterErrors errorType = putStrLn ("Exception: " ++ show errorType) >> exitWith (ExitFailure 84)

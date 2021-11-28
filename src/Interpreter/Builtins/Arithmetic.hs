@@ -1,15 +1,15 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Arithmetic
 --
 
-module Interpreter.Builtins.Arithmetic  ( add
-                                        , sub
+module Interpreter.Builtins.Arithmetic  ( addition
+                                        , subtraction
                                         , multiplication
-                                        , divProcedure
-                                        , modProcedure
+                                        , division
+                                        , modulo
                                         ) where
 
 import Control.Exception          ( throw )
@@ -32,44 +32,44 @@ import Interpreter.EvaluateValue  ( evaluateValue
 import Interpreter.Lexer          ( NumbersType )
 
 --- Builtin ---
-add :: Register -> [Tree] -> EvaluatedValue
-add = arithmetic (+)
+addition :: Register -> [Tree] -> EvaluatedValue
+addition = arithmeticWithInfArgs (+)
 
 --- Builtin ---
-sub :: Register -> [Tree] -> EvaluatedValue
-sub reg [tree]  = arithmetic (-) reg [Leaf (Number 0), tree]
-sub reg trees   = arithmetic (-) reg trees
+subtraction :: Register -> [Tree] -> EvaluatedValue
+subtraction reg [tree]  = arithmeticWithInfArgs (-) reg [Leaf (Number 0), tree]
+subtraction reg trees   = arithmeticWithInfArgs (-) reg trees
 
 --- Builtin ---
 multiplication :: Register -> [Tree] -> EvaluatedValue
-multiplication = arithmetic (*)
+multiplication = arithmeticWithInfArgs (*)
 
-arithmetic :: (NumbersType -> NumbersType -> NumbersType) -> Register -> [Tree] -> EvaluatedValue
-arithmetic _    _   []            = ValueNumber 0
-arithmetic _    reg [value]       = checkIsNum $ evaluateValue (Context (reg, value))
-arithmetic func reg (value : xs)  = arithmetic' func (evaluateValue (Context (reg, value))) $ arithmetic func reg xs
+arithmeticWithInfArgs :: (NumbersType -> NumbersType -> NumbersType) -> Register -> [Tree] -> EvaluatedValue
+arithmeticWithInfArgs _    _   []            = ValueNumber 0
+arithmeticWithInfArgs _    reg [value]       = checkIsNum $ evaluateValue (Context (reg, value))
+arithmeticWithInfArgs func reg (value : xs)  = arithmeticWithInfArgs' func (evaluateValue (Context (reg, value))) $ arithmeticWithInfArgs func reg xs
 
 checkIsNum :: EvaluatedValue -> EvaluatedValue
 checkIsNum value@(ValueNumber _)  = value
 checkIsNum _                      = throw ArgumentIsNotNumber
 
-arithmetic' :: (NumbersType -> NumbersType -> NumbersType) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
-arithmetic' func (ValueNumber a) (ValueNumber b)  = ValueNumber $ a `func` b
-arithmetic' _    _               _                = throw ArgumentIsNotNumber
+arithmeticWithInfArgs' :: (NumbersType -> NumbersType -> NumbersType) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
+arithmeticWithInfArgs' func (ValueNumber a) (ValueNumber b)  = ValueNumber $ a `func` b
+arithmeticWithInfArgs' _    _               _                = throw ArgumentIsNotNumber
 
 --- Builtin ---
-divProcedure :: Register -> [Tree] -> EvaluatedValue
-divProcedure = arithmetic2 (/)
+division :: Register -> [Tree] -> EvaluatedValue
+division = arithmeticWith2Args (/)
 
 --- Builtin ---
-modProcedure :: Register -> [Tree] -> EvaluatedValue
-modProcedure = arithmetic2 mod'
+modulo :: Register -> [Tree] -> EvaluatedValue
+modulo = arithmeticWith2Args mod'
 
-arithmetic2 :: (NumbersType -> NumbersType -> NumbersType) -> Register -> [Tree] -> EvaluatedValue
-arithmetic2 func reg [left, right] = arithmetic2' func (evaluateValue (Context (reg, left))) (evaluateValue (Context (reg, right)))
-arithmetic2 _    _   _             = throw InvalidNumberOfArguments
+arithmeticWith2Args :: (NumbersType -> NumbersType -> NumbersType) -> Register -> [Tree] -> EvaluatedValue
+arithmeticWith2Args func reg [left, right] = arithmeticWith2Args' func (evaluateValue (Context (reg, left))) (evaluateValue (Context (reg, right)))
+arithmeticWith2Args _    _   _             = throw InvalidNumberOfArguments
 
-arithmetic2' :: (NumbersType -> NumbersType -> NumbersType) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
-arithmetic2' func (ValueNumber left) (ValueNumber 0)     = throw DividingByZero
-arithmetic2' func (ValueNumber left) (ValueNumber right) = ValueNumber $ left `func` right
-arithmetic2' _    _                  _                   = throw ArgumentIsNotNumber
+arithmeticWith2Args' :: (NumbersType -> NumbersType -> NumbersType) -> EvaluatedValue -> EvaluatedValue -> EvaluatedValue
+arithmeticWith2Args' _    (ValueNumber _)    (ValueNumber 0)     = throw DividingByZero
+arithmeticWith2Args' func (ValueNumber left) (ValueNumber right) = ValueNumber $ left `func` right
+arithmeticWith2Args' _    _                  _                   = throw ArgumentIsNotNumber

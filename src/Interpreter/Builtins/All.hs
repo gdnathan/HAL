@@ -8,9 +8,9 @@
 module Interpreter.Builtins.All         ( initialRegister ) where
 
 import Data.Map                         ( fromList )
-import Interpreter.Register             ( Register ( Register )
-                                        , RegisterId ( RegisterId )
-                                        , EvaluatedValue ( Procedure )
+import Interpreter.Register             ( Register( Register )
+                                        , RegisterId( RegisterId )
+                                        , EvaluatedValue( Procedure )
                                         )
 import Interpreter.Builtins.List        ( cons
                                         , car
@@ -20,11 +20,11 @@ import Interpreter.Builtins.Test        ( isEq
                                         , isAtom
                                         , cond
                                         )
-import Interpreter.Builtins.Arithmetic  ( add
-                                        , sub
+import Interpreter.Builtins.Arithmetic  ( addition
+                                        , subtraction
                                         , multiplication
-                                        , divProcedure
-                                        , modProcedure
+                                        , division
+                                        , modulo
                                         )
 import Interpreter.Builtins.Ord         ( ltProcedure
                                         , lteProcedure
@@ -42,11 +42,11 @@ initialRegister = Register $ fromList [ (RegisterId "cons",   Procedure cons)
                                       , (RegisterId "cdr",    Procedure cdr)
                                       , (RegisterId "eq?",    Procedure isEq)
                                       , (RegisterId "atom?",  Procedure isAtom)
-                                      , (RegisterId "+",      Procedure add)
-                                      , (RegisterId "-",      Procedure sub)
+                                      , (RegisterId "+",      Procedure addition)
+                                      , (RegisterId "-",      Procedure subtraction)
                                       , (RegisterId "*",      Procedure multiplication)
-                                      , (RegisterId "div",    Procedure divProcedure)
-                                      , (RegisterId "mod",    Procedure modProcedure)
+                                      , (RegisterId "div",    Procedure division)
+                                      , (RegisterId "mod",    Procedure modulo)
                                       , (RegisterId "<",      Procedure ltProcedure)
                                       , (RegisterId "<=",     Procedure lteProcedure)
                                       , (RegisterId ">",      Procedure gtProcedure)

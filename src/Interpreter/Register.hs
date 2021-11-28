@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Register
 --
@@ -46,11 +46,6 @@ instance Show EvaluatedValue where
       show ValueTrue            = "#t"
       show list@(List _)        = showValueList list
       show (Procedure _)        = "#<procedure>"
-instance Eq EvaluatedValue where
-      (==) (ValueNumber x) (ValueNumber y)  = x == y
-      (==) (ValueName   x) (ValueName   y)  = x == y
-      (==)  ValueNil        ValueNil        = True
-      (==)  _               _               = False
 
 regInsert :: Register -> RegisterId -> EvaluatedValue -> Register
 regInsert (Register reg) id value = Register $ Map.insert id value reg

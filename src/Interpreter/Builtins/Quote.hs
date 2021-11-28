@@ -1,6 +1,6 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Quote
 --
@@ -29,12 +29,12 @@ quote :: Register -> [Tree] -> EvaluatedValue
 quote _ = quote'
 
 quote' :: [Tree] -> EvaluatedValue
-quote' [Node []]                   = ValueNil
-quote' [Node args]                 = createList args
-quote' [Leaf (UncreatedList list)] = List (ValueName "quote", List (createList list, ValueNil))
-quote' [Leaf (Number n)]           = ValueNumber n
-quote' [Leaf (Symbol n)]           = ValueName n
-quote'  args                       = throw InvalidNumberOfArguments
+quote' [Node []]                    = ValueNil
+quote' [Node args]                  = createList args
+quote' [Leaf (UncreatedList list)]  = List (ValueName "quote", List (createList list, ValueNil))
+quote' [Leaf (Number n)]            = ValueNumber n
+quote' [Leaf (Symbol n)]            = ValueName n
+quote' _                            = throw InvalidNumberOfArguments
 
 createList :: [Tree] -> EvaluatedValue
 createList []          = ValueNil

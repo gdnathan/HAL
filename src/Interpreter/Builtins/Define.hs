@@ -1,28 +1,34 @@
 --
 -- EPITECH PROJECT, 2021
--- B-FUN-501-BDX-5-1-HAL-guillaume.bogard-coquard
+-- HAL
 -- File description:
 -- Define
 --
 
-module Interpreter.Builtins.Define where
+module Interpreter.Builtins.Define  ( define
+                                    , createProcedure
+                                    , createProcedure'
+                                    ) where
 
-import Data.Map                   ( Map )
-import qualified Data.Map as Map
-import Control.Exception          ( throw )
+import Data.Map                     ( insert )
+import Control.Exception            ( throw )
 
-import Interpreter.Error          ( Error( InvalidNumberOfArguments, InvalidSyntax ) )
-import Interpreter.Register       ( regInsert
-                                  , EvaluatedValue( Procedure )
-                                  , Register(..)
-                                  , RegisterId( RegisterId )
-                                  )
-import Interpreter.Parser         ( Tree(..)
-                                  , ProcedureArg( Symbol )
-                                  )
-import Interpreter.EvaluateValue  ( EvaluatingContext( Context )
-                                  , evaluateValue
-                                  )
+import Interpreter.Error            ( Error( InvalidNumberOfArguments
+                                            , InvalidSyntax
+                                            )
+                                    )
+import Interpreter.Register         ( regInsert
+                                    , regInsertRange
+                                    , EvaluatedValue( Procedure )
+                                    , Register
+                                    , RegisterId( RegisterId )
+                                    )
+import Interpreter.Parser           ( Tree(..)
+                                    , ProcedureArg( Symbol )
+                                    )
+import Interpreter.EvaluateValue    ( evaluateValue
+                                    , EvaluatingContext( Context )
+                                    )
 
 define :: Register -> [Tree] -> (Register, RegisterId)
 define reg  [Leaf (Symbol name)                  , body] = (regInsert reg (RegisterId name) $ evaluateValue (Context (reg, body)) , RegisterId name)
@@ -33,19 +39,16 @@ createProcedure :: [Tree] -> Tree -> EvaluatedValue
 createProcedure = createProcedure' evaluateArgs
 
 createProcedure' :: (Register -> [Tree] -> [EvaluatedValue]) -> [Tree] -> Tree -> EvaluatedValue
-createProcedure' evalArgs argsName body = Procedure $ \reg args -> evaluateValue $ Context (addArgsToRegister (argsToIdsList argsName) (evalArgs reg args) reg, body)
+createProcedure' prepArgs argsName body = Procedure $ \reg args -> evaluateValue $ Context (addArgsToRegister reg (map argToId argsName) (prepArgs reg args), body)
 
 evaluateArgs :: Register -> [Tree] -> [EvaluatedValue]
-evaluateArgs _    []        = []
-evaluateArgs reg  (x : xs)  = evaluateValue (Context (reg, x)) : evaluateArgs reg xs
+evaluateArgs reg = map $ evaluateValue . curry Context reg
 
-argsToIdsList :: [Tree] -> [RegisterId]
-argsToIdsList []                          = []
-argsToIdsList ((Leaf (Symbol name)) : xs) = RegisterId name : argsToIdsList xs
-argsToIdsList _                           = throw $ InvalidSyntax "argument name must be a string"
+argToId :: Tree -> RegisterId
+argToId (Leaf (Symbol name)) = RegisterId name
+argToId _                    = throw $ InvalidSyntax "argument name must be a string"
 
-addArgsToRegister :: [RegisterId] -> [EvaluatedValue] -> Register -> Register
-addArgsToRegister []        []        reg             = reg
-addArgsToRegister _         []        _               = throw InvalidNumberOfArguments
-addArgsToRegister []        _         _               = throw InvalidNumberOfArguments
-addArgsToRegister (x : xs)  (y : ys)  (Register reg)  = addArgsToRegister xs ys $ Register $ Map.insert x y reg
+addArgsToRegister :: Register -> [RegisterId] -> [EvaluatedValue] -> Register
+addArgsToRegister reg ids values
+    | length ids /= length values = throw InvalidNumberOfArguments
+    | otherwise                   = regInsertRange reg ids values

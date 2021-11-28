@@ -54,13 +54,18 @@ resReg :: EvaluationResult -> Register
 resReg (Result (reg, _)) = reg
 
 printHelp :: IO ()
-printHelp = putStrLn "This is a help."
+printHelp = putStrLn  "./hal [files | flags] ...\
+                      \ (none)  -> launch the REPL\
+                      \ files   -> a list of files to be interpreted\
+                      \ flags   ->\
+                      \     -h | --help  -> display this help\
+                      \     -i           -> launch the REPL"
 
 infiniteLoop :: Register -> IO ()
-infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' reg line)
+infiniteLoop reg = putStr "> " >> hFlush stdout >> (getLine >>= \line -> infiniteLoop' $ evaluateExpr reg line)
 
-infiniteLoop' :: Register -> String -> IO ()
-infiniteLoop' reg line = let (Result (newReg, res)) = evaluateExpr reg line in print res >> infiniteLoop newReg
+infiniteLoop' :: EvaluationResult -> IO ()
+infiniteLoop' (Result (newReg, res)) = print res >> infiniteLoop newReg
 
 handleCLIArgumentsErrors :: CLIArguments.Error.Error -> IO ()
 handleCLIArgumentsErrors error = putStrLn ("CLI Exception: " ++ show error) >> exitWith (ExitFailure 84)
